@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, PartyPopper } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { FundManagerBadge } from "@/components/FundManagerBadge";
 
 export default function SettlementPage() {
   const { activeTrip, getSettlements, getMemberName } = useTrip();
@@ -64,9 +65,15 @@ export default function SettlementPage() {
                     <CardContent className="p-4 flex items-center gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 text-sm">
-                          <span className="font-display font-semibold">{getMemberName(s.fromId)}</span>
+                          <span className="font-display font-semibold inline-flex items-center gap-1">
+                            {getMemberName(s.fromId)}
+                            {activeTrip.fundManagerId === s.fromId && <FundManagerBadge />}
+                          </span>
                           <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                          <span className="font-display font-semibold">{getMemberName(s.toId)}</span>
+                          <span className="font-display font-semibold inline-flex items-center gap-1">
+                            {getMemberName(s.toId)}
+                            {activeTrip.fundManagerId === s.toId && <FundManagerBadge />}
+                          </span>
                         </div>
                         <p className="text-lg font-display font-bold text-primary mt-0.5">
                           {activeTrip.currency} {s.amount.toFixed(2)}

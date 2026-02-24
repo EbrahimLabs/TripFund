@@ -11,6 +11,7 @@ import { Share2, Trash2, ArrowDownCircle, ArrowUpCircle, Pencil, X, Check } from
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { FundManagerBadge } from "@/components/FundManagerBadge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -203,9 +204,9 @@ export default function SummaryPage() {
                                 <ArrowUpCircle className="h-4 w-4 text-expense shrink-0" />
                               )}
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">
+                                <p className="text-sm font-medium truncate flex items-center gap-1">
                                   {isDeposit
-                                    ? getMemberName(tx.memberId!)
+                                    ? <><span>{getMemberName(tx.memberId!)}</span>{activeTrip.fundManagerId === tx.memberId && <FundManagerBadge />}</>
                                     : `${tx.category}${tx.subcategory ? ` · ${tx.subcategory}` : ""}`}
                                 </p>
                                 <p className="text-xs text-muted-foreground truncate">
@@ -264,9 +265,15 @@ export default function SummaryPage() {
                   <Card key={i}>
                     <CardContent className="p-3">
                       <p className="text-sm">
-                        <span className="font-semibold">{getMemberName(s.fromId)}</span>
+                        <span className="font-semibold inline-flex items-center gap-1">
+                          {getMemberName(s.fromId)}
+                          {activeTrip.fundManagerId === s.fromId && <FundManagerBadge />}
+                        </span>
                         {" pays "}
-                        <span className="font-semibold">{getMemberName(s.toId)}</span>
+                        <span className="font-semibold inline-flex items-center gap-1">
+                          {getMemberName(s.toId)}
+                          {activeTrip.fundManagerId === s.toId && <FundManagerBadge />}
+                        </span>
                         {" "}
                         <span className="font-display font-bold text-primary">
                           {activeTrip.currency} {s.amount.toFixed(2)}

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { useCategoryManager } from "@/hooks/useCategoryManager";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
+import { FundManagerBadge } from "@/components/FundManagerBadge";
 
 export default function AddExpense() {
   const { activeTrip, addTransaction } = useTrip();
@@ -252,7 +253,10 @@ export default function AddExpense() {
               {activeTrip.members.map((m) => (
                 <label key={m.id} className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-secondary/50 transition-colors">
                   <Checkbox checked={selectedMembers.includes(m.id)} onCheckedChange={() => toggleMember(m.id)} />
-                  <span className="text-sm font-medium flex-1">{m.name}</span>
+                  <span className="text-sm font-medium flex-1 flex items-center gap-1.5">
+                    {m.name}
+                    {activeTrip.fundManagerId === m.id && <FundManagerBadge />}
+                  </span>
                   {selectedMembers.includes(m.id) && amount && selectedMembers.length > 0 && (
                     <span className="text-xs text-muted-foreground">
                       {activeTrip.currency} {(parseFloat(amount || "0") / selectedMembers.length).toFixed(2)}

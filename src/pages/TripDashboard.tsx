@@ -5,7 +5,7 @@ import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
-import { ArrowDownCircle, ArrowUpCircle, Wallet, LogOut, Settings, Plus, TrendingUp } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Wallet, LogOut, Settings, Plus, TrendingUp, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from "recharts";
 import { CategoryManager } from "@/components/CategoryManager";
+import { FundManagerBadge } from "@/components/FundManagerBadge";
 
 const CHART_COLORS = [
   "hsl(160, 60%, 38%)",
@@ -27,7 +28,7 @@ export default function TripDashboard() {
   const {
     activeTrip, getStats, getMemberBalances, setActiveTripId,
     getDailyExpenses, getCategoryBreakdown,
-    editTripDetails, addMember, renameMember,
+    editTripDetails, addMember, renameMember, setFundManager,
   } = useTrip();
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
@@ -105,12 +106,23 @@ export default function TripDashboard() {
                       <Input value={tripName} onChange={(e) => setTripName(e.target.value)} />
                     </div>
                     <Button onClick={handleSaveSettings} className="w-full">Save Changes</Button>
-                    <Button onClick={handleSaveSettings} className="w-full">Save Changes</Button>
                   </TabsContent>
 
                   <TabsContent value="members" className="space-y-3 mt-4">
+                    <p className="text-xs text-muted-foreground">Tap the crown to set as Fund Manager</p>
                     {activeTrip.members.map((m) => (
                       <div key={m.id} className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setFundManager(activeTrip.fundManagerId === m.id ? undefined : m.id)}
+                          className={`shrink-0 p-1.5 rounded-md transition-colors ${
+                            activeTrip.fundManagerId === m.id
+                              ? "text-primary bg-primary/10"
+                              : "text-muted-foreground/40 hover:text-muted-foreground"
+                          }`}
+                        >
+                          <Crown className="h-4 w-4" />
+                        </button>
                         {editingMemberId === m.id ? (
                           <>
                             <Input
@@ -124,7 +136,10 @@ export default function TripDashboard() {
                           </>
                         ) : (
                           <>
-                            <span className="flex-1 text-sm">{m.name}</span>
+                            <span className="flex-1 text-sm flex items-center gap-1.5">
+                              {m.name}
+                              {activeTrip.fundManagerId === m.id && <FundManagerBadge />}
+                            </span>
                             <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setEditingMemberId(m.id); setEditMemberName(m.name); }}>
                               Rename
                             </Button>
@@ -280,7 +295,10 @@ export default function TripDashboard() {
                 <Card>
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-display font-semibold text-sm">{b.member.name}</span>
+                      <span className="font-display font-semibold text-sm flex items-center gap-1.5">
+                        {b.member.name}
+                        {activeTrip.fundManagerId === b.member.id && <FundManagerBadge />}
+                      </span>
                       <span
                         className={cn(
                           "font-display font-bold text-sm",
