@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, PlusCircle, Receipt, Handshake, FileText, Settings } from "lucide-react";
+import { LayoutDashboard, PlusCircle, Receipt, Handshake, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -8,7 +8,6 @@ const navItems = [
   { to: "/expense", icon: Receipt, label: "Expense" },
   { to: "/settle", icon: Handshake, label: "Settle" },
   { to: "/summary", icon: FileText, label: "Summary" },
-  { to: "/categories", icon: Settings, label: "Manage" },
 ];
 
 export function BottomNav() {

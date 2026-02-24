@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowDownCircle, ArrowUpCircle, Wallet, LogOut, Settings, Plus, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from "recharts";
+import { CategoryManager } from "@/components/CategoryManager";
 
 const CHART_COLORS = [
   "hsl(160, 60%, 38%)",
@@ -80,29 +82,36 @@ export default function TripDashboard() {
         title={activeTrip.name}
         action={
           <div className="flex gap-1">
-            <Dialog open={showSettings} onOpenChange={setShowSettings}>
-              <DialogTrigger asChild>
+            <Sheet open={showSettings} onOpenChange={setShowSettings}>
+              <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
                   <Settings className="h-4 w-4" />
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Trip Settings</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Trip Name</Label>
-                    <Input value={tripName} onChange={(e) => setTripName(e.target.value)} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Currency</Label>
-                    <Input value={tripCurrency} onChange={(e) => setTripCurrency(e.target.value.toUpperCase())} maxLength={3} />
-                  </div>
-                  <Button onClick={handleSaveSettings} className="w-full">Save Changes</Button>
+              </SheetTrigger>
+              <SheetContent className="overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Trip Settings</SheetTitle>
+                </SheetHeader>
+                <Tabs defaultValue="general" className="mt-4">
+                  <TabsList className="w-full">
+                    <TabsTrigger value="general" className="flex-1 text-xs">General</TabsTrigger>
+                    <TabsTrigger value="members" className="flex-1 text-xs">Members</TabsTrigger>
+                    <TabsTrigger value="categories" className="flex-1 text-xs">Categories</TabsTrigger>
+                  </TabsList>
 
-                  <div className="border-t pt-4 space-y-3">
-                    <Label className="text-sm font-semibold">Members</Label>
+                  <TabsContent value="general" className="space-y-4 mt-4">
+                    <div className="space-y-2">
+                      <Label>Trip Name</Label>
+                      <Input value={tripName} onChange={(e) => setTripName(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Currency</Label>
+                      <Input value={tripCurrency} onChange={(e) => setTripCurrency(e.target.value.toUpperCase())} maxLength={3} />
+                    </div>
+                    <Button onClick={handleSaveSettings} className="w-full">Save Changes</Button>
+                  </TabsContent>
+
+                  <TabsContent value="members" className="space-y-3 mt-4">
                     {activeTrip.members.map((m) => (
                       <div key={m.id} className="flex items-center gap-2">
                         {editingMemberId === m.id ? (
@@ -138,10 +147,14 @@ export default function TripDashboard() {
                         <Plus className="h-3 w-3 mr-1" /> Add
                       </Button>
                     </div>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+                  </TabsContent>
+
+                  <TabsContent value="categories" className="mt-4">
+                    <CategoryManager />
+                  </TabsContent>
+                </Tabs>
+              </SheetContent>
+            </Sheet>
             <Button
               variant="ghost"
               size="icon"
