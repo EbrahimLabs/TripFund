@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Trip, Transaction, Member, Settlement } from "@/types/trip";
+import { Trip, Transaction, Settlement } from "@/types/trip";
 
 const STORAGE_KEY = "tripfund_trips";
 const ACTIVE_TRIP_KEY = "tripfund_active_trip";
@@ -55,6 +55,10 @@ export function useTripStore() {
     );
   }, [activeTripId]);
 
+  const editTripDetails = useCallback((name: string, currency: string) => {
+    updateTrip((t) => ({ ...t, name, currency }));
+  }, [updateTrip]);
+
   const addMember = useCallback((name: string) => {
     updateTrip((t) => ({
       ...t,
@@ -62,10 +66,26 @@ export function useTripStore() {
     }));
   }, [updateTrip]);
 
+  const renameMember = useCallback((memberId: string, newName: string) => {
+    updateTrip((t) => ({
+      ...t,
+      members: t.members.map((m) => m.id === memberId ? { ...m, name: newName } : m),
+    }));
+  }, [updateTrip]);
+
   const addTransaction = useCallback((tx: Omit<Transaction, "id">) => {
     updateTrip((t) => ({
       ...t,
       transactions: [...t.transactions, { ...tx, id: generateId() }],
+    }));
+  }, [updateTrip]);
+
+  const updateTransaction = useCallback((txId: string, updates: Partial<Omit<Transaction, "id">>) => {
+    updateTrip((t) => ({
+      ...t,
+      transactions: t.transactions.map((tx) =>
+        tx.id === txId ? { ...tx, ...updates } : tx
+      ),
     }));
   }, [updateTrip]);
 
@@ -114,6 +134,29 @@ export function useTripStore() {
     });
   }, [activeTrip]);
 
+  const getDailyExpenses = useCallback(() => {
+    if (!activeTrip) return [];
+    const expenses = activeTrip.transactions.filter((t) => t.type === "expense");
+    const byDate: Record<string, number> = {};
+    expenses.forEach((e) => {
+      byDate[e.date] = (byDate[e.date] || 0) + e.amount;
+    });
+    return Object.entries(byDate)
+      .map(([date, amount]) => ({ date, amount }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [activeTrip]);
+
+  const getCategoryBreakdown = useCallback(() => {
+    if (!activeTrip) return [];
+    const expenses = activeTrip.transactions.filter((t) => t.type === "expense");
+    const byCategory: Record<string, number> = {};
+    expenses.forEach((e) => {
+      const cat = e.category || "Misc";
+      byCategory[cat] = (byCategory[cat] || 0) + e.amount;
+    });
+    return Object.entries(byCategory).map(([category, amount]) => ({ category, amount }));
+  }, [activeTrip]);
+
   const getSettlements = useCallback((): Settlement[] => {
     const balances = getMemberBalances();
     const debtors = balances.filter((b) => b.net < 0).map((b) => ({ ...b }));
@@ -152,12 +195,17 @@ export function useTripStore() {
     activeTripId,
     setActiveTripId,
     createTrip,
+    editTripDetails,
     addMember,
+    renameMember,
     addTransaction,
+    updateTransaction,
     deleteTransaction,
     deleteTrip,
     getStats,
     getMemberBalances,
+    getDailyExpenses,
+    getCategoryBreakdown,
     getSettlements,
     getMemberName,
   };

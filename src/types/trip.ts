@@ -12,6 +12,16 @@ export interface Member {
   name: string;
 }
 
+export const CATEGORIES = ["Food", "Transport", "Accommodation", "Misc"] as const;
+export type Category = typeof CATEGORIES[number];
+
+export const SUBCATEGORIES: Record<Category, string[]> = {
+  Food: ["Breakfast", "Lunch", "Dinner", "Snacks", "Drinks"],
+  Transport: ["Taxi", "Bus", "Fuel", "Parking", "Flight", "Train"],
+  Accommodation: ["Hotel", "Airbnb", "Hostel", "Resort"],
+  Misc: ["Shopping", "Activities", "Tips", "Tickets", "Other"],
+};
+
 export interface Transaction {
   id: string;
   type: "deposit" | "expense";
@@ -19,7 +29,8 @@ export interface Transaction {
   date: string;
   note: string;
   memberId?: string; // for deposits
-  category?: "Food" | "Transport" | "Accommodation" | "Misc"; // for expenses
+  category?: Category; // for expenses
+  subcategory?: string; // for expenses
   splits?: ExpenseSplit[]; // for expenses
 }
 

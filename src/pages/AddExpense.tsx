@@ -9,14 +9,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-
-const CATEGORIES = ["Food", "Transport", "Accommodation", "Misc"] as const;
+import { CATEGORIES, SUBCATEGORIES, Category } from "@/types/trip";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function AddExpense() {
   const { activeTrip, addTransaction } = useTrip();
   const navigate = useNavigate();
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState<typeof CATEGORIES[number]>("Food");
+  const [category, setCategory] = useState<Category>("Food");
+  const [subcategory, setSubcategory] = useState<string>(SUBCATEGORIES.Food[0]);
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
@@ -25,6 +26,10 @@ export default function AddExpense() {
     if (!activeTrip) navigate("/");
     else setSelectedMembers(activeTrip.members.map((m) => m.id));
   }, [activeTrip, navigate]);
+
+  useEffect(() => {
+    setSubcategory(SUBCATEGORIES[category][0]);
+  }, [category]);
 
   if (!activeTrip) return null;
 
@@ -51,6 +56,7 @@ export default function AddExpense() {
       date,
       note,
       category,
+      subcategory,
       splits,
     });
     toast.success("Expense added!");
@@ -96,6 +102,32 @@ export default function AddExpense() {
               ))}
             </div>
           </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={category}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="space-y-2 overflow-hidden"
+            >
+              <Label>Subcategory</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {SUBCATEGORIES[category].map((sub) => (
+                  <Button
+                    key={sub}
+                    type="button"
+                    variant={subcategory === sub ? "secondary" : "ghost"}
+                    size="sm"
+                    onClick={() => setSubcategory(sub)}
+                    className="text-xs h-7 px-2.5"
+                  >
+                    {sub}
+                  </Button>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
