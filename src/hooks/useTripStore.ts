@@ -35,12 +35,14 @@ export function useTripStore() {
 
   const activeTrip = trips.find((t) => t.id === activeTripId) || null;
 
-  const createTrip = useCallback((name: string, currency: string, memberNames: string[]) => {
+  const createTrip = useCallback((name: string, currency: string, memberNames: string[], fundManagerIndex?: number) => {
+    const members = memberNames.map((n) => ({ id: generateId(), name: n }));
     const trip: Trip = {
       id: generateId(),
       name,
       currency,
-      members: memberNames.map((n) => ({ id: generateId(), name: n })),
+      fundManagerId: fundManagerIndex !== undefined && fundManagerIndex >= 0 ? members[fundManagerIndex]?.id : undefined,
+      members,
       transactions: [],
       createdAt: new Date().toISOString(),
     };
@@ -49,11 +51,16 @@ export function useTripStore() {
     return trip;
   }, []);
 
+
   const updateTrip = useCallback((updater: (trip: Trip) => Trip) => {
     setTrips((prev) =>
       prev.map((t) => (t.id === activeTripId ? updater(t) : t))
     );
   }, [activeTripId]);
+
+  const setFundManager = useCallback((memberId: string | undefined) => {
+    updateTrip((t) => ({ ...t, fundManagerId: memberId }));
+  }, [updateTrip]);
 
   const editTripDetails = useCallback((name: string, currency: string) => {
     updateTrip((t) => ({ ...t, name, currency }));
@@ -195,6 +202,7 @@ export function useTripStore() {
     activeTripId,
     setActiveTripId,
     createTrip,
+    setFundManager,
     editTripDetails,
     addMember,
     renameMember,

@@ -2,6 +2,7 @@ export interface Trip {
   id: string;
   name: string;
   currency: string;
+  fundManagerId?: string;
   members: Member[];
   transactions: Transaction[];
   createdAt: string;

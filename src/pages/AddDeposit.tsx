@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { FundManagerBadge } from "@/components/FundManagerBadge";
 
 export default function AddDeposit() {
   const { activeTrip, addTransaction } = useTrip();
@@ -87,6 +88,7 @@ export default function AddDeposit() {
                   className="w-full"
                 >
                   {m.name}
+                  {activeTrip.fundManagerId === m.id && <> <FundManagerBadge /></>}
                 </Button>
               ))}
             </div>

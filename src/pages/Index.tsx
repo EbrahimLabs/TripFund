@@ -5,19 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, X, MapPin, Wallet, Trash2 } from "lucide-react";
+import { Plus, X, MapPin, Wallet, Trash2, Crown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { FundManagerBadge } from "@/components/FundManagerBadge";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
 const Index = () => {
@@ -25,13 +19,16 @@ const Index = () => {
   const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(false);
   const [tripName, setTripName] = useState("");
-  
   const [members, setMembers] = useState<string[]>([""]);
+  const [fundManagerIndex, setFundManagerIndex] = useState<number>(0);
 
   const handleCreate = () => {
     const validMembers = members.filter((m) => m.trim());
     if (!tripName.trim() || validMembers.length < 2) return;
-    createTrip(tripName.trim(), "BDT", validMembers.map((m) => m.trim()));
+    // Map fundManagerIndex to the valid members list
+    const validIndex = members[fundManagerIndex]?.trim() ? 
+      validMembers.indexOf(members[fundManagerIndex].trim()) : 0;
+    createTrip(tripName.trim(), "BDT", validMembers.map((m) => m.trim()), validIndex >= 0 ? validIndex : 0);
     navigate("/dashboard");
   };
 
@@ -46,7 +43,11 @@ const Index = () => {
   };
 
   const addMemberField = () => setMembers((m) => [...m, ""]);
-  const removeMember = (i: number) => setMembers((m) => m.filter((_, idx) => idx !== i));
+  const removeMember = (i: number) => {
+    setMembers((m) => m.filter((_, idx) => idx !== i));
+    if (fundManagerIndex === i) setFundManagerIndex(0);
+    else if (fundManagerIndex > i) setFundManagerIndex((prev) => prev - 1);
+  };
   const updateMember = (i: number, val: string) =>
     setMembers((m) => m.map((v, idx) => (idx === i ? val : v)));
 
@@ -82,18 +83,10 @@ const Index = () => {
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Recent Trips</p>
                   {trips.map((trip, i) => (
-                    <motion.div
-                      key={trip.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                    >
+                    <motion.div key={trip.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
                       <Card className="cursor-pointer hover:border-primary/40 transition-colors group">
                         <CardContent className="flex items-center gap-3 p-3">
-                          <div
-                            className="flex items-center gap-3 flex-1 min-w-0"
-                            onClick={() => handleSelectTrip(trip.id)}
-                          >
+                          <div className="flex items-center gap-3 flex-1 min-w-0" onClick={() => handleSelectTrip(trip.id)}>
                             <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-secondary">
                               <MapPin className="h-4 w-4 text-secondary-foreground" />
                             </div>
@@ -106,30 +99,18 @@ const Index = () => {
                           </div>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                                onClick={(e) => e.stopPropagation()}
-                              >
+                              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={(e) => e.stopPropagation()}>
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete "{trip.name}"?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This will permanently delete this trip and all its transactions.
-                                </AlertDialogDescription>
+                                <AlertDialogDescription>This will permanently delete this trip and all its transactions.</AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteTrip(trip.id)}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Delete
-                                </AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleDeleteTrip(trip.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
@@ -144,21 +125,27 @@ const Index = () => {
             <motion.div key="create" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="tripName">Trip Name</Label>
-                <Input
-                  id="tripName"
-                  placeholder="e.g., Bali 2025"
-                  value={tripName}
-                  onChange={(e) => setTripName(e.target.value)}
-                  autoFocus
-                />
+                <Input id="tripName" placeholder="e.g., Bali 2025" value={tripName} onChange={(e) => setTripName(e.target.value)} autoFocus />
               </div>
-
 
               <div className="space-y-2">
                 <Label>Members (min 2)</Label>
+                <p className="text-xs text-muted-foreground">Tap the crown to set as Fund Manager</p>
                 <div className="space-y-2">
                   {members.map((m, i) => (
-                    <div key={i} className="flex gap-2">
+                    <div key={i} className="flex gap-2 items-center">
+                      <button
+                        type="button"
+                        onClick={() => setFundManagerIndex(i)}
+                        className={`shrink-0 p-1.5 rounded-md transition-colors ${
+                          fundManagerIndex === i
+                            ? "text-primary bg-primary/10"
+                            : "text-muted-foreground/40 hover:text-muted-foreground"
+                        }`}
+                        title={fundManagerIndex === i ? "Fund Manager" : "Set as Fund Manager"}
+                      >
+                        <Crown className="h-4 w-4" />
+                      </button>
                       <Input
                         placeholder={`Member ${i + 1}`}
                         value={m}
@@ -178,14 +165,8 @@ const Index = () => {
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => setShowCreate(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  className="flex-1"
-                  onClick={handleCreate}
-                  disabled={!tripName.trim() || members.filter((m) => m.trim()).length < 2}
-                >
+                <Button variant="outline" className="flex-1" onClick={() => setShowCreate(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleCreate} disabled={!tripName.trim() || members.filter((m) => m.trim()).length < 2}>
                   Create Trip
                 </Button>
               </div>
