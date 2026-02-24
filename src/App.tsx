@@ -10,6 +10,7 @@ import AddDeposit from "./pages/AddDeposit";
 import AddExpense from "./pages/AddExpense";
 import SettlementPage from "./pages/SettlementPage";
 import SummaryPage from "./pages/SummaryPage";
+import ManageCategories from "./pages/ManageCategories";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/expense" element={<AddExpense />} />
             <Route path="/settle" element={<SettlementPage />} />
             <Route path="/summary" element={<SummaryPage />} />
+            <Route path="/categories" element={<ManageCategories />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -9,23 +9,27 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { CATEGORIES, Category } from "@/types/trip";
-import { useCustomSubcategories } from "@/hooks/useCustomSubcategories";
+import { useCategoryManager } from "@/hooks/useCategoryManager";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
 
 export default function AddExpense() {
   const { activeTrip, addTransaction } = useTrip();
   const navigate = useNavigate();
-  const { getSubcategories, addSubcategory } = useCustomSubcategories();
+  const { getCategoryNames, getSubcategories, addCategory, addSubcategory } = useCategoryManager();
+
+  const categoryNames = getCategoryNames();
   const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState<Category>("Food");
-  const [subcategory, setSubcategory] = useState<string>(getSubcategories("Food")[0]);
+  const [category, setCategory] = useState(categoryNames[0] || "Food");
+  const [subcategory, setSubcategory] = useState(getSubcategories(category)[0] || "");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [newSubcategory, setNewSubcategory] = useState("");
-  const [showAddSub, setShowAddSub] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+
+  const [showAddCat, setShowAddCat] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+  const [showAddSub, setShowAddSub] = useState(false);
+  const [newSubcategory, setNewSubcategory] = useState("");
 
   useEffect(() => {
     if (!activeTrip) navigate("/");
@@ -33,15 +37,36 @@ export default function AddExpense() {
   }, [activeTrip, navigate]);
 
   useEffect(() => {
-    setSubcategory(getSubcategories(category)[0]);
-  }, [category]);
+    setSubcategory(getSubcategories(category)[0] || "");
+  }, [category, getSubcategories]);
 
   if (!activeTrip) return null;
 
-  const toggleMember = (id: string) => {
+  const toggleMember = (id: string) =>
     setSelectedMembers((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
+
+  const handleAddCategory = () => {
+    if (addCategory(newCategory)) {
+      setCategory(newCategory.trim());
+      setNewCategory("");
+      setShowAddCat(false);
+      toast.success("Category added!");
+    } else {
+      toast.error("Already exists or empty");
+    }
+  };
+
+  const handleAddSubcategory = () => {
+    if (addSubcategory(category, newSubcategory)) {
+      setSubcategory(newSubcategory.trim());
+      setNewSubcategory("");
+      setShowAddSub(false);
+      toast.success("Subcategory added!");
+    } else {
+      toast.error("Already exists or empty");
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -50,17 +75,14 @@ export default function AddExpense() {
     if (!amt || amt <= 0 || selectedMembers.length === 0) return;
 
     const shareAmount = Math.round((amt / selectedMembers.length) * 100) / 100;
-    const splits = selectedMembers.map((mid) => ({
-      memberId: mid,
-      shareAmount,
-    }));
+    const splits = selectedMembers.map((mid) => ({ memberId: mid, shareAmount }));
 
     addTransaction({
       type: "expense",
       amount: amt,
       date,
       note,
-      category,
+      category: category as any,
       subcategory,
       splits,
     });
@@ -74,6 +96,7 @@ export default function AddExpense() {
     <>
       <PageShell title="Add Expense">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Amount */}
           <div className="space-y-2">
             <Label htmlFor="expAmount">Amount ({activeTrip.currency})</Label>
             <Input
@@ -90,10 +113,49 @@ export default function AddExpense() {
             />
           </div>
 
+          {/* Category */}
           <div className="space-y-2">
-            <Label>Category</Label>
-            <div className="grid grid-cols-4 gap-1.5">
-              {CATEGORIES.map((cat) => (
+            <div className="flex items-center justify-between">
+              <Label>Category</Label>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-xs h-6 px-2 gap-1"
+                onClick={() => setShowAddCat((v) => !v)}
+              >
+                <Plus className="h-3 w-3" />
+                Add
+              </Button>
+            </div>
+            <AnimatePresence>
+              {showAddCat && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="flex gap-2 overflow-hidden"
+                >
+                  <Input
+                    placeholder="New category..."
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    className="h-8 text-xs"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddCategory();
+                      }
+                    }}
+                  />
+                  <Button type="button" size="sm" className="h-8 text-xs" onClick={handleAddCategory}>
+                    Add
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <div className="flex flex-wrap gap-1.5">
+              {categoryNames.map((cat) => (
                 <Button
                   key={cat}
                   type="button"
@@ -108,6 +170,7 @@ export default function AddExpense() {
             </div>
           </div>
 
+          {/* Subcategory */}
           <AnimatePresence mode="wait">
             <motion.div
               key={category}
@@ -145,32 +208,11 @@ export default function AddExpense() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
-                          if (addSubcategory(category, newSubcategory)) {
-                            setSubcategory(newSubcategory.trim());
-                            setNewSubcategory("");
-                            setShowAddSub(false);
-                            toast.success("Subcategory added!");
-                          } else {
-                            toast.error("Already exists or empty");
-                          }
+                          handleAddSubcategory();
                         }
                       }}
                     />
-                    <Button
-                      type="button"
-                      size="sm"
-                      className="h-8 text-xs"
-                      onClick={() => {
-                        if (addSubcategory(category, newSubcategory)) {
-                          setSubcategory(newSubcategory.trim());
-                          setNewSubcategory("");
-                          setShowAddSub(false);
-                          toast.success("Subcategory added!");
-                        } else {
-                          toast.error("Already exists or empty");
-                        }
-                      }}
-                    >
+                    <Button type="button" size="sm" className="h-8 text-xs" onClick={handleAddSubcategory}>
                       Add
                     </Button>
                   </motion.div>
@@ -193,40 +235,23 @@ export default function AddExpense() {
             </motion.div>
           </AnimatePresence>
 
+          {/* Split among */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Split among</Label>
               <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs h-6 px-2"
-                  onClick={() => setSelectedMembers(activeTrip.members.map((m) => m.id))}
-                >
+                <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setSelectedMembers(activeTrip.members.map((m) => m.id))}>
                   Select all
                 </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs h-6 px-2"
-                  onClick={() => setSelectedMembers([])}
-                >
+                <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setSelectedMembers([])}>
                   Clear
                 </Button>
               </div>
             </div>
             <div className="space-y-1.5">
               {activeTrip.members.map((m) => (
-                <label
-                  key={m.id}
-                  className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-secondary/50 transition-colors"
-                >
-                  <Checkbox
-                    checked={selectedMembers.includes(m.id)}
-                    onCheckedChange={() => toggleMember(m.id)}
-                  />
+                <label key={m.id} className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-secondary/50 transition-colors">
+                  <Checkbox checked={selectedMembers.includes(m.id)} onCheckedChange={() => toggleMember(m.id)} />
                   <span className="text-sm font-medium flex-1">{m.name}</span>
                   {selectedMembers.includes(m.id) && amount && selectedMembers.length > 0 && (
                     <span className="text-xs text-muted-foreground">
@@ -238,32 +263,19 @@ export default function AddExpense() {
             </div>
           </div>
 
+          {/* Date */}
           <div className="space-y-2">
             <Label htmlFor="expDate">Date</Label>
-            <Input
-              id="expDate"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+            <Input id="expDate" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </div>
 
+          {/* Note */}
           <div className="space-y-2">
             <Label htmlFor="expNote">Note (optional)</Label>
-            <Textarea
-              id="expNote"
-              placeholder="e.g., Dinner at the beach"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={2}
-            />
+            <Textarea id="expNote" placeholder="e.g., Dinner at the beach" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full h-12 text-base font-semibold"
-            disabled={!amount || selectedMembers.length === 0}
-          >
+          <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={!amount || selectedMembers.length === 0}>
             Add Expense
           </Button>
         </form>
