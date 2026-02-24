@@ -1,0 +1,178 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTrip } from "@/context/TripContext";
+import { PageShell } from "@/components/PageShell";
+import { BottomNav } from "@/components/BottomNav";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
+
+const CATEGORIES = ["Food", "Transport", "Accommodation", "Misc"] as const;
+
+export default function AddExpense() {
+  const { activeTrip, addTransaction } = useTrip();
+  const navigate = useNavigate();
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState<typeof CATEGORIES[number]>("Food");
+  const [note, setNote] = useState("");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!activeTrip) navigate("/");
+    else setSelectedMembers(activeTrip.members.map((m) => m.id));
+  }, [activeTrip, navigate]);
+
+  if (!activeTrip) return null;
+
+  const toggleMember = (id: string) => {
+    setSelectedMembers((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const amt = parseFloat(amount);
+    if (!amt || amt <= 0 || selectedMembers.length === 0) return;
+
+    const shareAmount = Math.round((amt / selectedMembers.length) * 100) / 100;
+    const splits = selectedMembers.map((mid) => ({
+      memberId: mid,
+      shareAmount,
+    }));
+
+    addTransaction({
+      type: "expense",
+      amount: amt,
+      date,
+      note,
+      category,
+      splits,
+    });
+    toast.success("Expense added!");
+    setAmount("");
+    setNote("");
+    setSelectedMembers(activeTrip.members.map((m) => m.id));
+  };
+
+  return (
+    <>
+      <PageShell title="Add Expense">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="expAmount">Amount ({activeTrip.currency})</Label>
+            <Input
+              id="expAmount"
+              type="number"
+              inputMode="decimal"
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              min="0"
+              step="0.01"
+              autoFocus
+              className="text-2xl font-display font-bold h-14"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Category</Label>
+            <div className="grid grid-cols-4 gap-1.5">
+              {CATEGORIES.map((cat) => (
+                <Button
+                  key={cat}
+                  type="button"
+                  variant={category === cat ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCategory(cat)}
+                  className="text-xs"
+                >
+                  {cat}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Split among</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-6 px-2"
+                  onClick={() => setSelectedMembers(activeTrip.members.map((m) => m.id))}
+                >
+                  Select all
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-6 px-2"
+                  onClick={() => setSelectedMembers([])}
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              {activeTrip.members.map((m) => (
+                <label
+                  key={m.id}
+                  className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-secondary/50 transition-colors"
+                >
+                  <Checkbox
+                    checked={selectedMembers.includes(m.id)}
+                    onCheckedChange={() => toggleMember(m.id)}
+                  />
+                  <span className="text-sm font-medium flex-1">{m.name}</span>
+                  {selectedMembers.includes(m.id) && amount && selectedMembers.length > 0 && (
+                    <span className="text-xs text-muted-foreground">
+                      {activeTrip.currency} {(parseFloat(amount || "0") / selectedMembers.length).toFixed(2)}
+                    </span>
+                  )}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="expDate">Date</Label>
+            <Input
+              id="expDate"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="expNote">Note (optional)</Label>
+            <Textarea
+              id="expNote"
+              placeholder="e.g., Dinner at the beach"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              rows={2}
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full h-12 text-base font-semibold"
+            disabled={!amount || selectedMembers.length === 0}
+          >
+            Add Expense
+          </Button>
+        </form>
+      </PageShell>
+      <BottomNav />
+    </>
+  );
+}
