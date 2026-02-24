@@ -32,7 +32,7 @@ export default function TripDashboard() {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
   const [tripName, setTripName] = useState("");
-  const [tripCurrency, setTripCurrency] = useState("");
+  
   const [newMemberName, setNewMemberName] = useState("");
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [editMemberName, setEditMemberName] = useState("");
@@ -41,7 +41,7 @@ export default function TripDashboard() {
     if (!activeTrip) navigate("/");
     else {
       setTripName(activeTrip.name);
-      setTripCurrency(activeTrip.currency);
+      
     }
   }, [activeTrip, navigate]);
 
@@ -54,7 +54,7 @@ export default function TripDashboard() {
 
   const handleSaveSettings = () => {
     if (tripName.trim()) {
-      editTripDetails(tripName.trim(), tripCurrency.trim() || "USD");
+      editTripDetails(tripName.trim(), "BDT");
       toast.success("Trip updated!");
       setShowSettings(false);
     }
@@ -104,10 +104,7 @@ export default function TripDashboard() {
                       <Label>Trip Name</Label>
                       <Input value={tripName} onChange={(e) => setTripName(e.target.value)} />
                     </div>
-                    <div className="space-y-2">
-                      <Label>Currency</Label>
-                      <Input value={tripCurrency} onChange={(e) => setTripCurrency(e.target.value.toUpperCase())} maxLength={3} />
-                    </div>
+                    <Button onClick={handleSaveSettings} className="w-full">Save Changes</Button>
                     <Button onClick={handleSaveSettings} className="w-full">Save Changes</Button>
                   </TabsContent>
 

@@ -25,13 +25,13 @@ const Index = () => {
   const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(false);
   const [tripName, setTripName] = useState("");
-  const [currency, setCurrency] = useState("USD");
+  
   const [members, setMembers] = useState<string[]>([""]);
 
   const handleCreate = () => {
     const validMembers = members.filter((m) => m.trim());
     if (!tripName.trim() || validMembers.length < 2) return;
-    createTrip(tripName.trim(), currency, validMembers.map((m) => m.trim()));
+    createTrip(tripName.trim(), "BDT", validMembers.map((m) => m.trim()));
     navigate("/dashboard");
   };
 
@@ -100,7 +100,7 @@ const Index = () => {
                             <div className="flex-1 min-w-0">
                               <p className="font-display font-semibold text-sm truncate">{trip.name}</p>
                               <p className="text-xs text-muted-foreground">
-                                {trip.members.length} members · {trip.currency} · {trip.transactions.length} txns
+                                {trip.members.length} members · {trip.transactions.length} txns
                               </p>
                             </div>
                           </div>
@@ -153,16 +153,6 @@ const Index = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="currency">Currency</Label>
-                <Input
-                  id="currency"
-                  placeholder="USD"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-                  maxLength={3}
-                />
-              </div>
 
               <div className="space-y-2">
                 <Label>Members (min 2)</Label>
