@@ -9,17 +9,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { CATEGORIES, SUBCATEGORIES, Category } from "@/types/trip";
+import { CATEGORIES, Category } from "@/types/trip";
+import { useCustomSubcategories } from "@/hooks/useCustomSubcategories";
 import { motion, AnimatePresence } from "framer-motion";
+import { Plus } from "lucide-react";
 
 export default function AddExpense() {
   const { activeTrip, addTransaction } = useTrip();
   const navigate = useNavigate();
+  const { getSubcategories, addSubcategory } = useCustomSubcategories();
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState<Category>("Food");
-  const [subcategory, setSubcategory] = useState<string>(SUBCATEGORIES.Food[0]);
+  const [subcategory, setSubcategory] = useState<string>(getSubcategories("Food")[0]);
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [newSubcategory, setNewSubcategory] = useState("");
+  const [showAddSub, setShowAddSub] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
 
   useEffect(() => {
@@ -28,7 +33,7 @@ export default function AddExpense() {
   }, [activeTrip, navigate]);
 
   useEffect(() => {
-    setSubcategory(SUBCATEGORIES[category][0]);
+    setSubcategory(getSubcategories(category)[0]);
   }, [category]);
 
   if (!activeTrip) return null;
@@ -111,9 +116,68 @@ export default function AddExpense() {
               exit={{ opacity: 0, height: 0 }}
               className="space-y-2 overflow-hidden"
             >
-              <Label>Subcategory</Label>
+              <div className="flex items-center justify-between">
+                <Label>Subcategory</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-6 px-2 gap-1"
+                  onClick={() => setShowAddSub((v) => !v)}
+                >
+                  <Plus className="h-3 w-3" />
+                  Add
+                </Button>
+              </div>
+              <AnimatePresence>
+                {showAddSub && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="flex gap-2 overflow-hidden"
+                  >
+                    <Input
+                      placeholder="New subcategory..."
+                      value={newSubcategory}
+                      onChange={(e) => setNewSubcategory(e.target.value)}
+                      className="h-8 text-xs"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          if (addSubcategory(category, newSubcategory)) {
+                            setSubcategory(newSubcategory.trim());
+                            setNewSubcategory("");
+                            setShowAddSub(false);
+                            toast.success("Subcategory added!");
+                          } else {
+                            toast.error("Already exists or empty");
+                          }
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => {
+                        if (addSubcategory(category, newSubcategory)) {
+                          setSubcategory(newSubcategory.trim());
+                          setNewSubcategory("");
+                          setShowAddSub(false);
+                          toast.success("Subcategory added!");
+                        } else {
+                          toast.error("Already exists or empty");
+                        }
+                      }}
+                    >
+                      Add
+                    </Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               <div className="flex flex-wrap gap-1.5">
-                {SUBCATEGORIES[category].map((sub) => (
+                {getSubcategories(category).map((sub) => (
                   <Button
                     key={sub}
                     type="button"
