@@ -14,6 +14,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
 import { FundManagerBadge } from "@/components/FundManagerBadge";
 
+type SplitMode = "equal" | "unequal" | "percentage";
+
 export default function AddExpense() {
   const { activeTrip, addTransaction } = useTrip();
   const navigate = useNavigate();
@@ -26,6 +28,10 @@ export default function AddExpense() {
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+
+  const [splitMode, setSplitMode] = useState<SplitMode>("equal");
+  const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({});
+  const [percentages, setPercentages] = useState<Record<string, string>>({});
 
   const [showAddCat, setShowAddCat] = useState(false);
   const [newCategory, setNewCategory] = useState("");
@@ -40,6 +46,21 @@ export default function AddExpense() {
   useEffect(() => {
     setSubcategory(getSubcategories(category)[0] || "");
   }, [category, getSubcategories]);
+
+  // Reset custom amounts when members change
+  useEffect(() => {
+    if (activeTrip) {
+      const equalPct = selectedMembers.length > 0 ? (100 / selectedMembers.length).toFixed(1) : "0";
+      const newPct: Record<string, string> = {};
+      const newAmts: Record<string, string> = {};
+      selectedMembers.forEach((id) => {
+        newPct[id] = percentages[id] || equalPct;
+        newAmts[id] = customAmounts[id] || "";
+      });
+      setPercentages(newPct);
+      setCustomAmounts(newAmts);
+    }
+  }, [selectedMembers.length]);
 
   if (!activeTrip) return null;
 
@@ -70,17 +91,54 @@ export default function AddExpense() {
     }
   };
 
+  const computeSplits = () => {
+    const amt = parseFloat(amount);
+    if (!amt || amt <= 0 || selectedMembers.length === 0) return null;
+
+    if (splitMode === "equal") {
+      const shareAmount = Math.round((amt / selectedMembers.length) * 100) / 100;
+      return selectedMembers.map((mid) => ({ memberId: mid, shareAmount }));
+    }
+
+    if (splitMode === "unequal") {
+      const total = selectedMembers.reduce((s, id) => s + (parseFloat(customAmounts[id] || "0")), 0);
+      if (Math.abs(total - amt) > 0.01) return null; // doesn't add up
+      return selectedMembers.map((mid) => ({
+        memberId: mid,
+        shareAmount: Math.round(parseFloat(customAmounts[mid] || "0") * 100) / 100,
+      }));
+    }
+
+    if (splitMode === "percentage") {
+      const totalPct = selectedMembers.reduce((s, id) => s + (parseFloat(percentages[id] || "0")), 0);
+      if (Math.abs(totalPct - 100) > 0.5) return null;
+      return selectedMembers.map((mid) => ({
+        memberId: mid,
+        shareAmount: Math.round((amt * parseFloat(percentages[mid] || "0") / 100) * 100) / 100,
+      }));
+    }
+
+    return null;
+  };
+
+  const getUnequalTotal = () =>
+    selectedMembers.reduce((s, id) => s + (parseFloat(customAmounts[id] || "0")), 0);
+
+  const getPercentageTotal = () =>
+    selectedMembers.reduce((s, id) => s + (parseFloat(percentages[id] || "0")), 0);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const amt = parseFloat(amount);
-    if (!amt || amt <= 0 || selectedMembers.length === 0) return;
-
-    const shareAmount = Math.round((amt / selectedMembers.length) * 100) / 100;
-    const splits = selectedMembers.map((mid) => ({ memberId: mid, shareAmount }));
+    const splits = computeSplits();
+    if (!splits) {
+      if (splitMode === "unequal") toast.error("Custom amounts must equal the total!");
+      else if (splitMode === "percentage") toast.error("Percentages must add up to 100%!");
+      return;
+    }
 
     addTransaction({
       type: "expense",
-      amount: amt,
+      amount: parseFloat(amount),
       date,
       note,
       category: category as any,
@@ -91,6 +149,22 @@ export default function AddExpense() {
     setAmount("");
     setNote("");
     setSelectedMembers(activeTrip.members.map((m) => m.id));
+    setSplitMode("equal");
+  };
+
+  const amt = parseFloat(amount) || 0;
+
+  const getShareDisplay = (memberId: string) => {
+    if (splitMode === "equal" && amt > 0 && selectedMembers.length > 0) {
+      return (amt / selectedMembers.length).toFixed(2);
+    }
+    if (splitMode === "unequal") {
+      return parseFloat(customAmounts[memberId] || "0").toFixed(2);
+    }
+    if (splitMode === "percentage" && amt > 0) {
+      return (amt * parseFloat(percentages[memberId] || "0") / 100).toFixed(2);
+    }
+    return "0.00";
   };
 
   return (
@@ -99,7 +173,7 @@ export default function AddExpense() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Amount */}
           <div className="space-y-2">
-            <Label htmlFor="expAmount">Amount ({activeTrip.currency})</Label>
+            <Label htmlFor="expAmount">Amount (BDT)</Label>
             <Input
               id="expAmount"
               type="number"
@@ -118,153 +192,138 @@ export default function AddExpense() {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Category</Label>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-xs h-6 px-2 gap-1"
-                onClick={() => setShowAddCat((v) => !v)}
-              >
-                <Plus className="h-3 w-3" />
-                Add
+              <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2 gap-1" onClick={() => setShowAddCat((v) => !v)}>
+                <Plus className="h-3 w-3" /> Add
               </Button>
             </div>
             <AnimatePresence>
               {showAddCat && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="flex gap-2 overflow-hidden"
-                >
-                  <Input
-                    placeholder="New category..."
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
-                    className="h-8 text-xs"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault();
-                        handleAddCategory();
-                      }
-                    }}
-                  />
-                  <Button type="button" size="sm" className="h-8 text-xs" onClick={handleAddCategory}>
-                    Add
-                  </Button>
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden">
+                  <Input placeholder="New category..." value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="h-8 text-xs" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCategory(); } }} />
+                  <Button type="button" size="sm" className="h-8 text-xs" onClick={handleAddCategory}>Add</Button>
                 </motion.div>
               )}
             </AnimatePresence>
             <div className="flex flex-wrap gap-1.5">
               {categoryNames.map((cat) => (
-                <Button
-                  key={cat}
-                  type="button"
-                  variant={category === cat ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCategory(cat)}
-                  className="text-xs"
-                >
-                  {cat}
-                </Button>
+                <Button key={cat} type="button" variant={category === cat ? "default" : "outline"} size="sm" onClick={() => setCategory(cat)} className="text-xs">{cat}</Button>
               ))}
             </div>
           </div>
 
           {/* Subcategory */}
           <AnimatePresence mode="wait">
-            <motion.div
-              key={category}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="space-y-2 overflow-hidden"
-            >
+            <motion.div key={category} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2 overflow-hidden">
               <div className="flex items-center justify-between">
                 <Label>Subcategory</Label>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs h-6 px-2 gap-1"
-                  onClick={() => setShowAddSub((v) => !v)}
-                >
-                  <Plus className="h-3 w-3" />
-                  Add
+                <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2 gap-1" onClick={() => setShowAddSub((v) => !v)}>
+                  <Plus className="h-3 w-3" /> Add
                 </Button>
               </div>
               <AnimatePresence>
                 {showAddSub && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="flex gap-2 overflow-hidden"
-                  >
-                    <Input
-                      placeholder="New subcategory..."
-                      value={newSubcategory}
-                      onChange={(e) => setNewSubcategory(e.target.value)}
-                      className="h-8 text-xs"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddSubcategory();
-                        }
-                      }}
-                    />
-                    <Button type="button" size="sm" className="h-8 text-xs" onClick={handleAddSubcategory}>
-                      Add
-                    </Button>
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden">
+                    <Input placeholder="New subcategory..." value={newSubcategory} onChange={(e) => setNewSubcategory(e.target.value)} className="h-8 text-xs" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSubcategory(); } }} />
+                    <Button type="button" size="sm" className="h-8 text-xs" onClick={handleAddSubcategory}>Add</Button>
                   </motion.div>
                 )}
               </AnimatePresence>
               <div className="flex flex-wrap gap-1.5">
                 {getSubcategories(category).map((sub) => (
-                  <Button
-                    key={sub}
-                    type="button"
-                    variant={subcategory === sub ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => setSubcategory(sub)}
-                    className="text-xs h-7 px-2.5"
-                  >
-                    {sub}
-                  </Button>
+                  <Button key={sub} type="button" variant={subcategory === sub ? "secondary" : "ghost"} size="sm" onClick={() => setSubcategory(sub)} className="text-xs h-7 px-2.5">{sub}</Button>
                 ))}
               </div>
             </motion.div>
           </AnimatePresence>
+
+          {/* Split Mode */}
+          <div className="space-y-2">
+            <Label>Split Mode</Label>
+            <div className="flex gap-1.5 p-1 bg-secondary rounded-lg">
+              {(["equal", "unequal", "percentage"] as const).map((mode) => (
+                <Button
+                  key={mode}
+                  type="button"
+                  variant={splitMode === mode ? "default" : "ghost"}
+                  size="sm"
+                  className="flex-1 text-xs capitalize h-7"
+                  onClick={() => setSplitMode(mode)}
+                >
+                  {mode === "percentage" ? "%" : mode}
+                </Button>
+              ))}
+            </div>
+          </div>
 
           {/* Split among */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>Split among</Label>
               <div className="flex gap-2">
-                <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setSelectedMembers(activeTrip.members.map((m) => m.id))}>
-                  Select all
-                </Button>
-                <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setSelectedMembers([])}>
-                  Clear
-                </Button>
+                <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setSelectedMembers(activeTrip.members.map((m) => m.id))}>Select all</Button>
+                <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setSelectedMembers([])}>Clear</Button>
               </div>
             </div>
             <div className="space-y-1.5">
-              {activeTrip.members.map((m) => (
-                <label key={m.id} className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-secondary/50 transition-colors">
-                  <Checkbox checked={selectedMembers.includes(m.id)} onCheckedChange={() => toggleMember(m.id)} />
-                  <span className="text-sm font-medium flex-1 flex items-center gap-1.5">
-                    {m.name}
-                    {activeTrip.fundManagerId === m.id && <FundManagerBadge />}
-                  </span>
-                  {selectedMembers.includes(m.id) && amount && selectedMembers.length > 0 && (
-                    <span className="text-xs text-muted-foreground">
-                      {activeTrip.currency} {(parseFloat(amount || "0") / selectedMembers.length).toFixed(2)}
+              {activeTrip.members.map((m) => {
+                const isSelected = selectedMembers.includes(m.id);
+                return (
+                  <label key={m.id} className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <Checkbox checked={isSelected} onCheckedChange={() => toggleMember(m.id)} />
+                    <span className="text-sm font-medium flex-1 flex items-center gap-1.5">
+                      {m.name}
+                      {activeTrip.fundManagerId === m.id && <FundManagerBadge />}
                     </span>
-                  )}
-                </label>
-              ))}
+
+                    {isSelected && splitMode === "unequal" && (
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        placeholder="0"
+                        value={customAmounts[m.id] || ""}
+                        onChange={(e) => setCustomAmounts((prev) => ({ ...prev, [m.id]: e.target.value }))}
+                        className="h-7 w-20 text-xs text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    )}
+
+                    {isSelected && splitMode === "percentage" && (
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          placeholder="0"
+                          value={percentages[m.id] || ""}
+                          onChange={(e) => setPercentages((prev) => ({ ...prev, [m.id]: e.target.value }))}
+                          className="h-7 w-16 text-xs text-right"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <span className="text-xs text-muted-foreground">%</span>
+                      </div>
+                    )}
+
+                    {isSelected && amt > 0 && (
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        ৳{getShareDisplay(m.id)}
+                      </span>
+                    )}
+                  </label>
+                );
+              })}
             </div>
+
+            {/* Validation helpers */}
+            {splitMode === "unequal" && amt > 0 && selectedMembers.length > 0 && (
+              <p className={`text-xs ${Math.abs(getUnequalTotal() - amt) > 0.01 ? "text-destructive" : "text-muted-foreground"}`}>
+                Total: ৳{getUnequalTotal().toFixed(2)} / ৳{amt.toFixed(2)}
+                {Math.abs(getUnequalTotal() - amt) > 0.01 && ` (${getUnequalTotal() > amt ? "+" : ""}${(getUnequalTotal() - amt).toFixed(2)} off)`}
+              </p>
+            )}
+            {splitMode === "percentage" && selectedMembers.length > 0 && (
+              <p className={`text-xs ${Math.abs(getPercentageTotal() - 100) > 0.5 ? "text-destructive" : "text-muted-foreground"}`}>
+                Total: {getPercentageTotal().toFixed(1)}% / 100%
+              </p>
+            )}
           </div>
 
           {/* Date */}

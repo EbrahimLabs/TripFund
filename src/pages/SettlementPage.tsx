@@ -9,14 +9,37 @@ import { Check, ArrowRight, PartyPopper } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { FundManagerBadge } from "@/components/FundManagerBadge";
+import { toast } from "sonner";
+
+const SETTLEMENT_KEY = "tripfund_settlements_completed";
+
+function loadCompleted(tripId: string): Set<string> {
+  try {
+    const data = localStorage.getItem(SETTLEMENT_KEY);
+    const all = data ? JSON.parse(data) : {};
+    return new Set(all[tripId] || []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveCompleted(tripId: string, completed: Set<string>) {
+  try {
+    const data = localStorage.getItem(SETTLEMENT_KEY);
+    const all = data ? JSON.parse(data) : {};
+    all[tripId] = Array.from(completed);
+    localStorage.setItem(SETTLEMENT_KEY, JSON.stringify(all));
+  } catch {}
+}
 
 export default function SettlementPage() {
   const { activeTrip, getSettlements, getMemberName } = useTrip();
   const navigate = useNavigate();
-  const [completed, setCompleted] = useState<Set<number>>(new Set());
+  const [completed, setCompleted] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!activeTrip) navigate("/");
+    else setCompleted(loadCompleted(activeTrip.id));
   }, [activeTrip, navigate]);
 
   if (!activeTrip) return null;
@@ -24,10 +47,14 @@ export default function SettlementPage() {
   const settlements = getSettlements();
   const allCompleted = settlements.length > 0 && completed.size === settlements.length;
 
-  const toggleComplete = (i: number) => {
+  const getKey = (s: typeof settlements[0]) => `${s.fromId}_${s.toId}`;
+
+  const toggleComplete = (key: string) => {
     setCompleted((prev) => {
       const next = new Set(prev);
-      next.has(i) ? next.delete(i) : next.add(i);
+      next.has(key) ? next.delete(key) : next.add(key);
+      saveCompleted(activeTrip.id, next);
+      if (!prev.has(key)) toast.success("Marked as paid!");
       return next;
     });
   };
@@ -49,9 +76,11 @@ export default function SettlementPage() {
               {allCompleted ? "✅ All settlements marked as completed!" : `${settlements.length} transaction${settlements.length > 1 ? "s" : ""} to settle:`}
             </p>
             <AnimatePresence>
-              {settlements.map((s, i) => (
+              {settlements.map((s, i) => {
+                const key = getKey(s);
+                return (
                 <motion.div
-                  key={i}
+                  key={key}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.08 }}
@@ -59,7 +88,7 @@ export default function SettlementPage() {
                   <Card
                     className={cn(
                       "transition-all duration-300",
-                      completed.has(i) && "opacity-50 scale-[0.98]"
+                      completed.has(key) && "opacity-50 scale-[0.98]"
                     )}
                   >
                     <CardContent className="p-4 flex items-center gap-3">
@@ -78,19 +107,23 @@ export default function SettlementPage() {
                         <p className="text-lg font-display font-bold text-primary mt-0.5">
                           {activeTrip.currency} {s.amount.toFixed(2)}
                         </p>
+                        {completed.has(key) && (
+                          <p className="text-xs text-muted-foreground mt-0.5">✅ Paid</p>
+                        )}
                       </div>
                       <Button
-                        variant={completed.has(i) ? "default" : "outline"}
+                        variant={completed.has(key) ? "default" : "outline"}
                         size="icon"
-                        className={cn("h-10 w-10 shrink-0 transition-all", completed.has(i) && "bg-primary")}
-                        onClick={() => toggleComplete(i)}
+                        className={cn("h-10 w-10 shrink-0 transition-all", completed.has(key) && "bg-primary")}
+                        onClick={() => toggleComplete(key)}
                       >
                         <Check className="h-4 w-4" />
                       </Button>
                     </CardContent>
                   </Card>
                 </motion.div>
-              ))}
+                );
+              })}
             </AnimatePresence>
           </div>
         )}

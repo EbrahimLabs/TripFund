@@ -83,9 +83,27 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
 
+    --success: 152 60% 42%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 38 90% 95%;
+
+    --deposit: 160 55% 45%;
+    --expense: 0 62% 55%;
+
     --border: 160 15% 18%;
     --input: 160 15% 18%;
     --ring: 160 55% 45%;
+
+    --sidebar-background: 160 20% 8%;
+    --sidebar-foreground: 150 10% 90%;
+    --sidebar-primary: 160 55% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 160 15% 15%;
+    --sidebar-accent-foreground: 150 10% 90%;
+    --sidebar-border: 160 15% 18%;
+    --sidebar-ring: 160 55% 45%;
   }
 }
 

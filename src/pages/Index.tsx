@@ -9,6 +9,7 @@ import { Plus, X, MapPin, Wallet, Trash2, Crown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { FundManagerBadge } from "@/components/FundManagerBadge";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -52,7 +53,10 @@ const Index = () => {
     setMembers((m) => m.map((v, idx) => (idx === i ? val : v)));
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
