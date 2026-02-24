@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTrip } from "@/context/TripContext";
 import { PageShell } from "@/components/PageShell";
@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Share2, Trash2, ArrowDownCircle, ArrowUpCircle, Pencil, X, Check } from "lucide-react";
+import { Share2, Trash2, ArrowDownCircle, ArrowUpCircle, Pencil, X, Check, Search, SlidersHorizontal, CalendarDays, User } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,6 +23,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Transaction } from "@/types/trip";
 
 export default function SummaryPage() {
@@ -32,22 +39,51 @@ export default function SummaryPage() {
   const [editAmount, setEditAmount] = useState("");
   const [editNote, setEditNote] = useState("");
   const [filter, setFilter] = useState<"all" | "deposit" | "expense">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [memberFilter, setMemberFilter] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
+  const stats = getStats();
+  const settlements = getSettlements();
+  const deposits = activeTrip?.transactions.filter((t) => t.type === "deposit") ?? [];
+  const expenses = activeTrip?.transactions.filter((t) => t.type === "expense") ?? [];
+
+  const hasActiveFilters = searchQuery || memberFilter !== "all" || dateFrom || dateTo;
+
+  const allTx = useMemo(() => {
+    if (!activeTrip) return [];
+    return activeTrip.transactions
+      .filter((t) => {
+        if (filter !== "all" && t.type !== filter) return false;
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          const matchNote = t.note?.toLowerCase().includes(q);
+          const matchCategory = t.category?.toLowerCase().includes(q);
+          const matchSubcategory = t.subcategory?.toLowerCase().includes(q);
+          const matchMember = t.memberId ? getMemberName(t.memberId).toLowerCase().includes(q) : false;
+          if (!matchNote && !matchCategory && !matchSubcategory && !matchMember) return false;
+        }
+        if (memberFilter !== "all") {
+          if (t.type === "deposit" && t.memberId !== memberFilter) return false;
+          if (t.type === "expense") {
+            const involvedMember = t.splits?.some((s) => s.memberId === memberFilter);
+            if (!involvedMember) return false;
+          }
+        }
+        if (dateFrom && t.date < dateFrom) return false;
+        if (dateTo && t.date > dateTo) return false;
+        return true;
+      })
+      .sort((a, b) => b.date.localeCompare(a.date));
+  }, [activeTrip, filter, searchQuery, memberFilter, dateFrom, dateTo, getMemberName]);
 
   useEffect(() => {
     if (!activeTrip) navigate("/");
   }, [activeTrip, navigate]);
 
   if (!activeTrip) return null;
-
-  const stats = getStats();
-  const settlements = getSettlements();
-
-  const allTx = activeTrip.transactions
-    .filter((t) => filter === "all" || t.type === filter)
-    .sort((a, b) => b.date.localeCompare(a.date));
-
-  const deposits = activeTrip.transactions.filter((t) => t.type === "deposit");
-  const expenses = activeTrip.transactions.filter((t) => t.type === "expense");
 
   const startEdit = (tx: Transaction) => {
     setEditingId(tx.id);
@@ -148,10 +184,108 @@ export default function SummaryPage() {
             ))}
           </div>
 
+          {/* Search & Filters */}
+          <div className="space-y-2">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Input
+                  placeholder="Search notes, categories, members…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-8 text-sm pl-8 pr-8"
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                    <X className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+              <Button
+                variant={showFilters ? "default" : "outline"}
+                size="sm"
+                className="h-8 px-2.5 shrink-0"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+                {hasActiveFilters && <span className="ml-1 h-1.5 w-1.5 rounded-full bg-primary-foreground" />}
+              </Button>
+            </div>
+
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid grid-cols-2 gap-2 p-3 bg-secondary/50 rounded-lg border border-border">
+                    <div className="col-span-2 space-y-1">
+                      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                        <User className="h-3 w-3" /> Member
+                      </Label>
+                      <Select value={memberFilter} onValueChange={setMemberFilter}>
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Members</SelectItem>
+                          {activeTrip.members.map((m) => (
+                            <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                        <CalendarDays className="h-3 w-3" /> From
+                      </Label>
+                      <Input
+                        type="date"
+                        value={dateFrom}
+                        onChange={(e) => setDateFrom(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                        <CalendarDays className="h-3 w-3" /> To
+                      </Label>
+                      <Input
+                        type="date"
+                        value={dateTo}
+                        onChange={(e) => setDateTo(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    {hasActiveFilters && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="col-span-2 h-7 text-xs text-muted-foreground"
+                        onClick={() => { setSearchQuery(""); setMemberFilter("all"); setDateFrom(""); setDateTo(""); }}
+                      >
+                        Clear all filters
+                      </Button>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* Transactions by date */}
           {allTx.length === 0 ? (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-              <p className="text-sm text-muted-foreground">No transactions yet.</p>
+              <p className="text-sm text-muted-foreground">
+                {hasActiveFilters ? "No transactions match your filters." : "No transactions yet."}
+              </p>
+              {hasActiveFilters && (
+                <Button variant="link" size="sm" className="text-xs mt-1" onClick={() => { setSearchQuery(""); setMemberFilter("all"); setDateFrom(""); setDateTo(""); setFilter("all"); }}>
+                  Clear filters
+                </Button>
+              )}
             </motion.div>
           ) : (
             <AnimatePresence>
