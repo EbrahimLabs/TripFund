@@ -13,30 +13,33 @@ import { toast } from "sonner";
 export default function AddDeposit() {
   const { activeTrip, addTransaction } = useTrip();
   const navigate = useNavigate();
-  const [memberId, setMemberId] = useState("");
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
   useEffect(() => {
     if (!activeTrip) navigate("/");
-    else if (!memberId && activeTrip.members.length) setMemberId(activeTrip.members[0].id);
-  }, [activeTrip, navigate, memberId]);
+    else if (selectedMembers.length === 0 && activeTrip.members.length)
+      setSelectedMembers(activeTrip.members.map((m) => m.id));
+  }, [activeTrip, navigate, selectedMembers.length]);
 
   if (!activeTrip) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const amt = parseFloat(amount);
-    if (!amt || amt <= 0 || !memberId) return;
-    addTransaction({
-      type: "deposit",
-      amount: amt,
-      date,
-      note,
-      memberId,
+    if (!amt || amt <= 0 || selectedMembers.length === 0) return;
+    selectedMembers.forEach((mid) => {
+      addTransaction({
+        type: "deposit",
+        amount: amt,
+        date,
+        note,
+        memberId: mid,
+      });
     });
-    toast.success("Deposit added!");
+    toast.success(`Deposit added for ${selectedMembers.length} member${selectedMembers.length > 1 ? "s" : ""}!`);
     setAmount("");
     setNote("");
   };
@@ -46,15 +49,41 @@ export default function AddDeposit() {
       <PageShell title="Add Deposit">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label>Member</Label>
+            <div className="flex items-center justify-between">
+              <Label>Member</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-6 px-2"
+                  onClick={() => setSelectedMembers(activeTrip.members.map((m) => m.id))}
+                >
+                  Select all
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-6 px-2"
+                  onClick={() => setSelectedMembers([])}
+                >
+                  Clear
+                </Button>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-2">
               {activeTrip.members.map((m) => (
                 <Button
                   key={m.id}
                   type="button"
-                  variant={memberId === m.id ? "default" : "outline"}
+                  variant={selectedMembers.includes(m.id) ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setMemberId(m.id)}
+                  onClick={() =>
+                    setSelectedMembers((prev) =>
+                      prev.includes(m.id) ? prev.filter((x) => x !== m.id) : [...prev, m.id]
+                    )
+                  }
                   className="w-full"
                 >
                   {m.name}
@@ -100,7 +129,7 @@ export default function AddDeposit() {
             />
           </div>
 
-          <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={!amount || !memberId}>
+          <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={!amount || selectedMembers.length === 0}>
             Add Deposit
           </Button>
         </form>
