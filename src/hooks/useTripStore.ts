@@ -56,6 +56,7 @@ export interface Trip {
     memberId?: string;
     category?: string;
     subcategory?: string;
+    createdAt?: string;
     splits?: { memberId: string; shareAmount: number }[];
   }[];
 }
@@ -135,6 +136,7 @@ export function useTripStore() {
             memberId: t.member_id,
             category: t.category,
             subcategory: t.subcategory,
+            createdAt: t.created_at,
             splits: txSplits.length > 0
               ? txSplits.map((s: any) => ({ memberId: s.member_id, shareAmount: Number(s.share_amount) }))
               : undefined,
@@ -277,6 +279,7 @@ export function useTripStore() {
       memberId,
       category: tx.category,
       subcategory: tx.subcategory,
+      createdAt: inserted.created_at || new Date().toISOString(),
       splits: insertedSplits,
     };
 
@@ -323,6 +326,7 @@ export function useTripStore() {
       memberId: row.member_id,
       category: undefined,
       subcategory: undefined,
+      createdAt: row.created_at || new Date().toISOString(),
       splits: undefined,
     }));
 
@@ -521,6 +525,7 @@ export function useTripStore() {
         date: new Date().toISOString().split("T")[0],
         note: "[Settlement]",
         memberId: fromId,
+        createdAt: inserted.created_at || new Date().toISOString(),
       }],
     }));
   }, [activeTripId, getSettlementTxMap, saveSettlementTxMap, updateTripInState]);

@@ -76,7 +76,7 @@ export default function SummaryPage() {
         if (dateTo && t.date > dateTo) return false;
         return true;
       })
-      .sort((a, b) => b.date.localeCompare(a.date));
+      .sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || "").localeCompare(a.createdAt || ""));
   }, [activeTrip, filter, searchQuery, memberFilter, dateFrom, dateTo, getMemberName]);
 
   useEffect(() => {
