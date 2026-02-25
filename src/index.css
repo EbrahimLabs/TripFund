@@ -82,12 +82,12 @@
     --secondary-foreground: 228 15% 90%;
 
     --muted: 228 10% 11%;
-    --muted-foreground: 228 10% 55%;
+    --muted-foreground: 228 10% 60%;
 
     --accent: 215 80% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 72% 45%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 152 60% 42%;
