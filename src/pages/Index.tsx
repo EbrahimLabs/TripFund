@@ -26,7 +26,6 @@ const Index = () => {
   const handleCreate = () => {
     const validMembers = members.filter((m) => m.trim());
     if (!tripName.trim() || validMembers.length < 2) return;
-    // Map fundManagerIndex to the valid members list
     const validIndex = members[fundManagerIndex]?.trim() ? 
       validMembers.indexOf(members[fundManagerIndex].trim()) : 0;
     createTrip(tripName.trim(), "BDT", validMembers.map((m) => m.trim()), validIndex >= 0 ? validIndex : 0);
@@ -53,14 +52,19 @@ const Index = () => {
     setMembers((m) => m.map((v, idx) => (idx === i ? val : v)));
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative">
-      <div className="absolute top-4 right-4">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative gradient-hero mesh-bg">
+      <div className="absolute top-4 right-4 z-20">
         <ThemeToggle />
       </div>
+
+      {/* Decorative orbs */}
+      <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl animate-pulse-soft" />
+      <div className="absolute bottom-32 right-8 w-40 h-40 rounded-full bg-accent/10 blur-3xl animate-pulse-soft" style={{ animationDelay: "1s" }} />
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm space-y-8"
+        className="w-full max-w-sm space-y-8 relative z-10"
       >
         {/* Logo */}
         <div className="text-center space-y-2">
@@ -68,18 +72,18 @@ const Index = () => {
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-2"
+            className="inline-flex items-center justify-center w-18 h-18 rounded-2xl gradient-primary glow-primary mb-3 p-4"
           >
-            <Wallet className="h-8 w-8 text-primary" />
+            <Wallet className="h-8 w-8 text-primary-foreground" />
           </motion.div>
-          <h1 className="text-3xl font-display font-bold tracking-tight">TripFund</h1>
+          <h1 className="text-3xl font-display font-bold tracking-tight gradient-text">TripFund</h1>
           <p className="text-muted-foreground text-sm">Manage shared travel money, effortlessly.</p>
         </div>
 
         <AnimatePresence mode="wait">
           {!showCreate ? (
             <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-              <Button className="w-full h-12 text-base font-semibold" onClick={() => setShowCreate(true)}>
+              <Button className="w-full h-12 text-base font-semibold gradient-primary glow-primary hover:opacity-90 transition-opacity border-0" onClick={() => setShowCreate(true)}>
                 <Plus className="mr-2 h-5 w-5" /> New Trip
               </Button>
 
@@ -88,11 +92,11 @@ const Index = () => {
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Recent Trips</p>
                   {trips.map((trip, i) => (
                     <motion.div key={trip.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
-                      <Card className="cursor-pointer hover:border-primary/40 transition-colors group">
+                      <Card className="cursor-pointer glass card-elevated hover:glow-sm transition-all duration-300 group border-0">
                         <CardContent className="flex items-center gap-3 p-3">
                           <div className="flex items-center gap-3 flex-1 min-w-0" onClick={() => handleSelectTrip(trip.id)}>
-                            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-secondary">
-                              <MapPin className="h-4 w-4 text-secondary-foreground" />
+                            <div className="flex items-center justify-center w-10 h-10 rounded-xl gradient-primary">
+                              <MapPin className="h-4 w-4 text-primary-foreground" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-display font-semibold text-sm truncate">{trip.name}</p>
@@ -107,7 +111,7 @@ const Index = () => {
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent>
+                            <AlertDialogContent className="glass">
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete "{trip.name}"?</AlertDialogTitle>
                                 <AlertDialogDescription>This will permanently delete this trip and all its transactions.</AlertDialogDescription>
@@ -126,54 +130,59 @@ const Index = () => {
               )}
             </motion.div>
           ) : (
-            <motion.div key="create" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="tripName">Trip Name</Label>
-                <Input id="tripName" placeholder="e.g., Bali 2025" value={tripName} onChange={(e) => setTripName(e.target.value)} autoFocus />
-              </div>
+            <motion.div key="create" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-5">
+              <Card className="glass card-elevated border-0 p-5">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="tripName">Trip Name</Label>
+                    <Input id="tripName" placeholder="e.g., Bali 2025" value={tripName} onChange={(e) => setTripName(e.target.value)} autoFocus className="glass border-0" />
+                  </div>
 
-              <div className="space-y-2">
-                <Label>Members (min 2)</Label>
-                <p className="text-xs text-muted-foreground">Tap the crown to set as Fund Manager</p>
-                <div className="space-y-2">
-                  {members.map((m, i) => (
-                    <div key={i} className="flex gap-2 items-center">
-                      <button
-                        type="button"
-                        onClick={() => setFundManagerIndex(i)}
-                        className={`shrink-0 p-1.5 rounded-md transition-colors ${
-                          fundManagerIndex === i
-                            ? "text-primary bg-primary/10"
-                            : "text-muted-foreground/40 hover:text-muted-foreground"
-                        }`}
-                        title={fundManagerIndex === i ? "Fund Manager" : "Set as Fund Manager"}
-                      >
-                        <Crown className="h-4 w-4" />
-                      </button>
-                      <Input
-                        placeholder={`Member ${i + 1}`}
-                        value={m}
-                        onChange={(e) => updateMember(i, e.target.value)}
-                      />
-                      {members.length > 1 && (
-                        <Button variant="ghost" size="icon" onClick={() => removeMember(i)} className="shrink-0">
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
+                  <div className="space-y-2">
+                    <Label>Members (min 2)</Label>
+                    <p className="text-xs text-muted-foreground">Tap the crown to set as Fund Manager</p>
+                    <div className="space-y-2">
+                      {members.map((m, i) => (
+                        <div key={i} className="flex gap-2 items-center">
+                          <button
+                            type="button"
+                            onClick={() => setFundManagerIndex(i)}
+                            className={`shrink-0 p-1.5 rounded-lg transition-all ${
+                              fundManagerIndex === i
+                                ? "text-primary bg-primary/15 glow-sm"
+                                : "text-muted-foreground/40 hover:text-muted-foreground"
+                            }`}
+                            title={fundManagerIndex === i ? "Fund Manager" : "Set as Fund Manager"}
+                          >
+                            <Crown className="h-4 w-4" />
+                          </button>
+                          <Input
+                            placeholder={`Member ${i + 1}`}
+                            value={m}
+                            onChange={(e) => updateMember(i, e.target.value)}
+                            className="glass border-0"
+                          />
+                          {members.length > 1 && (
+                            <Button variant="ghost" size="icon" onClick={() => removeMember(i)} className="shrink-0">
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <Button variant="outline" size="sm" onClick={addMemberField} className="w-full">
-                  <Plus className="mr-1 h-4 w-4" /> Add Member
-                </Button>
-              </div>
+                    <Button variant="outline" size="sm" onClick={addMemberField} className="w-full glass border-0">
+                      <Plus className="mr-1 h-4 w-4" /> Add Member
+                    </Button>
+                  </div>
 
-              <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => setShowCreate(false)}>Cancel</Button>
-                <Button className="flex-1" onClick={handleCreate} disabled={!tripName.trim() || members.filter((m) => m.trim()).length < 2}>
-                  Create Trip
-                </Button>
-              </div>
+                  <div className="flex gap-2 pt-2">
+                    <Button variant="outline" className="flex-1 glass border-0" onClick={() => setShowCreate(false)}>Cancel</Button>
+                    <Button className="flex-1 gradient-primary glow-primary border-0" onClick={handleCreate} disabled={!tripName.trim() || members.filter((m) => m.trim()).length < 2}>
+                      Create Trip
+                    </Button>
+                  </div>
+                </div>
+              </Card>
             </motion.div>
           )}
         </AnimatePresence>

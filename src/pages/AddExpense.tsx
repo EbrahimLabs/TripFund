@@ -47,7 +47,6 @@ export default function AddExpense() {
     setSubcategory(getSubcategories(category)[0] || "");
   }, [category, getSubcategories]);
 
-  // Reset custom amounts when members change
   useEffect(() => {
     if (activeTrip) {
       const equalPct = selectedMembers.length > 0 ? (100 / selectedMembers.length).toFixed(1) : "0";
@@ -102,7 +101,7 @@ export default function AddExpense() {
 
     if (splitMode === "unequal") {
       const total = selectedMembers.reduce((s, id) => s + (parseFloat(customAmounts[id] || "0")), 0);
-      if (Math.abs(total - amt) > 0.01) return null; // doesn't add up
+      if (Math.abs(total - amt) > 0.01) return null;
       return selectedMembers.map((mid) => ({
         memberId: mid,
         shareAmount: Math.round(parseFloat(customAmounts[mid] || "0") * 100) / 100,
@@ -184,7 +183,7 @@ export default function AddExpense() {
               min="0"
               step="0.01"
               autoFocus
-              className="text-2xl font-display font-bold h-14"
+              className="text-2xl font-display font-bold h-14 glass border-0"
             />
           </div>
 
@@ -199,14 +198,23 @@ export default function AddExpense() {
             <AnimatePresence>
               {showAddCat && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden">
-                  <Input placeholder="New category..." value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="h-8 text-xs" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCategory(); } }} />
-                  <Button type="button" size="sm" className="h-8 text-xs" onClick={handleAddCategory}>Add</Button>
+                  <Input placeholder="New category..." value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="h-8 text-xs glass border-0" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCategory(); } }} />
+                  <Button type="button" size="sm" className="h-8 text-xs gradient-primary border-0" onClick={handleAddCategory}>Add</Button>
                 </motion.div>
               )}
             </AnimatePresence>
             <div className="flex flex-wrap gap-1.5">
               {categoryNames.map((cat) => (
-                <Button key={cat} type="button" variant={category === cat ? "default" : "outline"} size="sm" onClick={() => setCategory(cat)} className="text-xs">{cat}</Button>
+                <Button
+                  key={cat}
+                  type="button"
+                  variant={category === cat ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCategory(cat)}
+                  className={`text-xs transition-all ${category === cat ? "gradient-primary glow-sm border-0" : "glass border-0"}`}
+                >
+                  {cat}
+                </Button>
               ))}
             </div>
           </div>
@@ -223,8 +231,8 @@ export default function AddExpense() {
               <AnimatePresence>
                 {showAddSub && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden">
-                    <Input placeholder="New subcategory..." value={newSubcategory} onChange={(e) => setNewSubcategory(e.target.value)} className="h-8 text-xs" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSubcategory(); } }} />
-                    <Button type="button" size="sm" className="h-8 text-xs" onClick={handleAddSubcategory}>Add</Button>
+                    <Input placeholder="New subcategory..." value={newSubcategory} onChange={(e) => setNewSubcategory(e.target.value)} className="h-8 text-xs glass border-0" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSubcategory(); } }} />
+                    <Button type="button" size="sm" className="h-8 text-xs gradient-primary border-0" onClick={handleAddSubcategory}>Add</Button>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -239,14 +247,14 @@ export default function AddExpense() {
           {/* Split Mode */}
           <div className="space-y-2">
             <Label>Split Mode</Label>
-            <div className="flex gap-1.5 p-1 bg-secondary rounded-lg">
+            <div className="flex gap-1.5 p-1 glass rounded-xl">
               {(["equal", "unequal", "percentage"] as const).map((mode) => (
                 <Button
                   key={mode}
                   type="button"
                   variant={splitMode === mode ? "default" : "ghost"}
                   size="sm"
-                  className="flex-1 text-xs capitalize h-7"
+                  className={`flex-1 text-xs capitalize h-7 ${splitMode === mode ? "gradient-primary border-0" : ""}`}
                   onClick={() => setSplitMode(mode)}
                 >
                   {mode === "percentage" ? "%" : mode}
@@ -268,7 +276,7 @@ export default function AddExpense() {
               {activeTrip.members.map((m) => {
                 const isSelected = selectedMembers.includes(m.id);
                 return (
-                  <label key={m.id} className="flex items-center gap-3 rounded-lg border p-3 cursor-pointer hover:bg-secondary/50 transition-colors">
+                  <label key={m.id} className="flex items-center gap-3 rounded-xl glass border-0 p-3 cursor-pointer hover:glow-sm transition-all">
                     <Checkbox checked={isSelected} onCheckedChange={() => toggleMember(m.id)} />
                     <span className="text-sm font-medium flex-1 flex items-center gap-1.5">
                       {m.name}
@@ -282,7 +290,7 @@ export default function AddExpense() {
                         placeholder="0"
                         value={customAmounts[m.id] || ""}
                         onChange={(e) => setCustomAmounts((prev) => ({ ...prev, [m.id]: e.target.value }))}
-                        className="h-7 w-20 text-xs text-right"
+                        className="h-7 w-20 text-xs text-right glass border-0"
                         onClick={(e) => e.stopPropagation()}
                       />
                     )}
@@ -295,7 +303,7 @@ export default function AddExpense() {
                           placeholder="0"
                           value={percentages[m.id] || ""}
                           onChange={(e) => setPercentages((prev) => ({ ...prev, [m.id]: e.target.value }))}
-                          className="h-7 w-16 text-xs text-right"
+                          className="h-7 w-16 text-xs text-right glass border-0"
                           onClick={(e) => e.stopPropagation()}
                         />
                         <span className="text-xs text-muted-foreground">%</span>
@@ -329,16 +337,16 @@ export default function AddExpense() {
           {/* Date */}
           <div className="space-y-2">
             <Label htmlFor="expDate">Date</Label>
-            <Input id="expDate" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+            <Input id="expDate" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="glass border-0" />
           </div>
 
           {/* Note */}
           <div className="space-y-2">
             <Label htmlFor="expNote">Note (optional)</Label>
-            <Textarea id="expNote" placeholder="e.g., Dinner at the beach" value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
+            <Textarea id="expNote" placeholder="e.g., Dinner at the beach" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="glass border-0" />
           </div>
 
-          <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={!amount || selectedMembers.length === 0}>
+          <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0}>
             Add Expense
           </Button>
         </form>
