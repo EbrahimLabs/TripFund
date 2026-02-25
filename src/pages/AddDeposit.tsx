@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { FundManagerBadge } from "@/components/FundManagerBadge";
 
 export default function AddDeposit() {
@@ -84,7 +85,7 @@ export default function AddDeposit() {
             <Label htmlFor="note">Note (optional)</Label>
             <Textarea id="note" placeholder="e.g., Cash deposit" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="glass" />
           </div>
-          <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0 || submitting}>{submitting ? "Adding..." : "Add Deposit"}</Button>
+          <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0 || submitting}>{submitting ? <><Loader2 className="h-5 w-5 animate-spin" /> Adding...</> : "Add Deposit"}</Button>
         </form>
       </PageShell>
       <BottomNav />
