@@ -36,7 +36,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AuthRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuthContext();
   if (loading) return null;
-  if (user) return <Navigate to="/" replace />;
+  if (user) {
+    const pendingInvite = sessionStorage.getItem("pending_invite");
+    if (pendingInvite) {
+      sessionStorage.removeItem("pending_invite");
+      return <Navigate to={pendingInvite} replace />;
+    }
+    return <Navigate to="/" replace />;
+  }
   return <>{children}</>;
 }
 
@@ -84,7 +91,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<AuthRoute><AuthPage /></AuthRoute>} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/invite/:token" element={<ProtectedRoute><AppShell><InvitePage /></AppShell></ProtectedRoute>} />
+            <Route path="/invite/:token" element={<InvitePage />} />
             <Route path="/" element={<ProtectedRoute><TripProvider><AppShell><Index /></AppShell></TripProvider></ProtectedRoute>} />
             <Route path="/*" element={
               <ProtectedRoute>
