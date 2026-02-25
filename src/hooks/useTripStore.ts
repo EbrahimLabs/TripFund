@@ -329,18 +329,25 @@ export function useTripStore() {
     const settlements: Settlement[] = [];
 
     for (const b of balances) {
-      // Skip the fund manager themselves
-      if (b.member.id === activeTrip.fundManagerId) continue;
-
       if (b.net < -0.01) {
-        // Member owes the fund manager
-        settlements.push({
-          fromId: b.member.id,
-          toId: activeTrip.fundManagerId,
-          amount: Math.round(Math.abs(b.net) * 100) / 100,
-          completed: false,
-        });
-      } else if (b.net > 0.01) {
+        if (b.member.id === activeTrip.fundManagerId) {
+          // Fund manager also owes the fund (self-settlement)
+          settlements.push({
+            fromId: b.member.id,
+            toId: b.member.id,
+            amount: Math.round(Math.abs(b.net) * 100) / 100,
+            completed: false,
+          });
+        } else {
+          // Member owes the fund manager
+          settlements.push({
+            fromId: b.member.id,
+            toId: activeTrip.fundManagerId,
+            amount: Math.round(Math.abs(b.net) * 100) / 100,
+            completed: false,
+          });
+        }
+      } else if (b.net > 0.01 && b.member.id !== activeTrip.fundManagerId) {
         // Fund manager owes this member back
         settlements.push({
           fromId: activeTrip.fundManagerId,
@@ -353,6 +360,70 @@ export function useTripStore() {
 
     return settlements;
   }, [activeTrip, getMemberBalances]);
+
+  const SETTLEMENT_TX_KEY = "tripfund_settlement_txns";
+
+  const getSettlementTxMap = useCallback((): Record<string, string> => {
+    if (!activeTripId) return {};
+    try {
+      const data = localStorage.getItem(SETTLEMENT_TX_KEY);
+      const all = data ? JSON.parse(data) : {};
+      return all[activeTripId] || {};
+    } catch { return {}; }
+  }, [activeTripId]);
+
+  const saveSettlementTxMap = useCallback((map: Record<string, string>) => {
+    if (!activeTripId) return;
+    try {
+      const data = localStorage.getItem(SETTLEMENT_TX_KEY);
+      const all = data ? JSON.parse(data) : {};
+      all[activeTripId] = map;
+      localStorage.setItem(SETTLEMENT_TX_KEY, JSON.stringify(all));
+    } catch { }
+  }, [activeTripId]);
+
+  const markSettlementPaid = useCallback(async (fromId: string, toId: string, amount: number) => {
+    if (!activeTripId) return;
+    const key = `${fromId}_${toId}`;
+
+    // Create a deposit for the member who owes
+    const { data: inserted, error } = await supabase
+      .from("transactions")
+      .insert({
+        trip_id: activeTripId,
+        type: "deposit",
+        amount,
+        date: new Date().toISOString().split("T")[0],
+        note: "[Settlement]",
+        member_id: fromId,
+      })
+      .select()
+      .single();
+
+    if (error || !inserted) { if (import.meta.env.DEV) console.error(error); return; }
+
+    // Track the transaction ID so we can delete it if unmarked
+    const map = getSettlementTxMap();
+    map[key] = inserted.id;
+    saveSettlementTxMap(map);
+
+    await loadTrips();
+  }, [activeTripId, getSettlementTxMap, saveSettlementTxMap, loadTrips]);
+
+  const unmarkSettlementPaid = useCallback(async (fromId: string, toId: string) => {
+    if (!activeTripId) return;
+    const key = `${fromId}_${toId}`;
+    const map = getSettlementTxMap();
+    const txId = map[key];
+
+    if (txId) {
+      await supabase.from("transactions").delete().eq("id", txId);
+      delete map[key];
+      saveSettlementTxMap(map);
+    }
+
+    await loadTrips();
+  }, [activeTripId, getSettlementTxMap, saveSettlementTxMap, loadTrips]);
 
   const getMemberName = useCallback((id: string) => {
     return activeTrip?.members.find((m) => m.id === id)?.name || "Unknown";
@@ -407,5 +478,8 @@ export function useTripStore() {
     refreshTrips: loadTrips,
     createInvite,
     getMemberUserIds,
+    markSettlementPaid,
+    unmarkSettlementPaid,
+    getSettlementTxMap,
   };
 }
