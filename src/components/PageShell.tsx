@@ -21,7 +21,7 @@ export function PageShell({ title, children, className, action, backTo, icon: Ic
   try { sidebarCtx = useSidebar(); } catch {}
 
   return (
-    <div className={cn("min-h-screen mesh-bg", className)}>
+    <div className={cn("min-h-screen pb-24 mesh-bg", className)}>
       <header className="sticky top-0 z-40 glass-strong px-4 py-3.5" style={{ borderBottom: '1px solid var(--glass-border)' }}>
         <div className="mx-auto flex max-w-lg items-center gap-2">
           {backTo ? (

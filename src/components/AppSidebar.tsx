@@ -1,13 +1,10 @@
-import { useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, PlusCircle, Receipt, Handshake, FileText,
-  Settings, LogOut, UserCircle, Share2,
+  Settings, LogOut, UserCircle, Share2, Sun, Moon,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTrip } from "@/context/TripContext";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
   Sidebar,
@@ -19,27 +16,19 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
+  SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
-
-const navItems = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", ownerOnly: false },
-  { to: "/deposit", icon: PlusCircle, label: "Add Deposit", ownerOnly: true },
-  { to: "/expense", icon: Receipt, label: "Add Expense", ownerOnly: true },
-  { to: "/settle", icon: Handshake, label: "Settlement", ownerOnly: false },
-  { to: "/summary", icon: FileText, label: "Summary", ownerOnly: false },
-];
+import { Wallet, MapPin } from "lucide-react";
 
 export function AppSidebar() {
   const { isOwner, activeTrip, setActiveTripId, createInvite } = useTrip();
   const navigate = useNavigate();
   const { setOpenMobile } = useSidebar();
-  const location = useLocation();
-
-  const filteredNav = navItems.filter((item) => !item.ownerOnly || isOwner);
 
   const handleLeaveTrip = () => {
     setActiveTripId(null);
+    setOpenMobile(false);
     navigate("/");
   };
 
@@ -59,33 +48,19 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
-      <SidebarContent className="pt-4">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-sidebar-foreground/50">
-            Navigation
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {filteredNav.map((item) => (
-                <SidebarMenuItem key={item.to}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.to}
-                      end
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold"
-                      onClick={() => setOpenMobile(false)}
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+      <SidebarHeader className="p-4 border-b border-sidebar-border">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl gradient-primary shrink-0">
+            <MapPin className="h-4 w-4 text-primary-foreground" />
+          </div>
+          <div className="min-w-0">
+            <p className="font-display font-bold text-sm truncate">{activeTrip?.name || "TripFund"}</p>
+            <p className="text-xs text-sidebar-foreground/50">{activeTrip?.members.length || 0} members</p>
+          </div>
+        </div>
+      </SidebarHeader>
 
+      <SidebarContent className="pt-2">
         {isOwner && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-xs uppercase tracking-wider text-sidebar-foreground/50">
@@ -124,7 +99,7 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="p-3 space-y-1">
+      <SidebarFooter className="p-3 space-y-1 border-t border-sidebar-border">
         <div className="flex items-center justify-between px-3 py-1">
           <span className="text-xs text-sidebar-foreground/50">Theme</span>
           <ThemeToggle />
