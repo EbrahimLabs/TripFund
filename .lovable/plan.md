@@ -1,12 +1,21 @@
 
-## Sidebar Navigation + Simplified Sharing
 
-### Completed Changes
+## Make the Header Feel Integrated (Not Separated)
 
-1. **Sidebar replaces bottom nav & topbar actions** — Hamburger menu in header opens a slide-out sidebar with navigation (Dashboard, Deposit, Expense, Settle, Summary), manage section (Settings, Share Trip Link), and footer (Theme toggle, Account, Leave Trip). Owner-only items are conditionally hidden.
+The header currently feels visually disconnected because of two things:
+1. The `glass-strong` class gives it a distinct frosted background
+2. An explicit `borderBottom: 1px solid var(--glass-border)` draws a hard line
 
-2. **Dedicated Settings page** — Trip settings moved from a sheet in TripDashboard to `/settings` route. Contains General, Members, and Categories tabs.
+### Changes
 
-3. **Single share link** — Replaced per-member invite system with a single trip-wide share link. Anyone with the link can join as a new member with read-only access. Uses `accept_trip_invite` database function for secure member creation.
+**`src/components/PageShell.tsx`** (line 25):
+- Remove the inline `style={{ borderBottom: '1px solid var(--glass-border)' }}`
+- Replace `glass-strong` with a transparent background that blends into the page
+- Use a subtle bottom fade/gradient shadow instead of a hard border, so the header melts into the content
 
-4. **Role-based access** — `isOwner` flag controls visibility of Deposit, Expense, Settings routes and sidebar items. Non-owners see Dashboard, Settle, Summary only.
+**`src/pages/Index.tsx`** (header around line 68):
+- Apply the same treatment: remove `glass-strong` and the border style from the fixed header
+- Use the same subtle fade approach
+
+The result: the header will still be sticky and readable (via a soft backdrop blur) but will no longer look like a separate bar sitting on top of the page. Instead it will blend seamlessly into the `mesh-bg` background with just a gentle fade at the bottom edge.
+
