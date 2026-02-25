@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuthContext } from "@/context/AuthContext";
 import { TripProvider, useTrip } from "@/context/TripContext";
+import { SharedTripProvider } from "@/context/SharedTripContext";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import AuthPage from "./pages/AuthPage";
@@ -18,6 +19,9 @@ import SummaryPage from "./pages/SummaryPage";
 import TripSettings from "./pages/TripSettings";
 import AccountPage from "./pages/AccountPage";
 import InvitePage from "./pages/InvitePage";
+import SharedDashboard from "./pages/shared/SharedDashboard";
+import SharedSettle from "./pages/shared/SharedSettle";
+import SharedSummary from "./pages/shared/SharedSummary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -68,6 +72,17 @@ function TripLayout() {
   );
 }
 
+function SharedTripLayout() {
+  return (
+    <Routes>
+      <Route path="dashboard" element={<SharedDashboard />} />
+      <Route path="settle" element={<SharedSettle />} />
+      <Route path="summary" element={<SharedSummary />} />
+      <Route path="*" element={<Navigate to="dashboard" replace />} />
+    </Routes>
+  );
+}
+
 function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider defaultOpen={false}>
@@ -92,6 +107,11 @@ const App = () => (
             <Route path="/auth" element={<AuthRoute><AuthPage /></AuthRoute>} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/invite/:token" element={<InvitePage />} />
+            <Route path="/shared/:token/*" element={
+              <SharedTripProvider>
+                <SharedTripLayout />
+              </SharedTripProvider>
+            } />
             <Route path="/" element={<ProtectedRoute><TripProvider><AppShell><Index /></AppShell></TripProvider></ProtectedRoute>} />
             <Route path="/*" element={
               <ProtectedRoute>
