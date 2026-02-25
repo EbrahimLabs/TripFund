@@ -18,9 +18,9 @@ import { CategoryManager } from "@/components/CategoryManager";
 import { FundManagerBadge } from "@/components/FundManagerBadge";
 
 const CHART_COLORS = [
-  "hsl(260, 65%, 55%)",
-  "hsl(280, 60%, 60%)",
-  "hsl(300, 50%, 60%)",
+  "hsl(230, 98%, 55%)",
+  "hsl(215, 85%, 50%)",
+  "hsl(245, 70%, 58%)",
   "hsl(38, 90%, 55%)",
 ];
 
