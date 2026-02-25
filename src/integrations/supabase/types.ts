@@ -134,7 +134,7 @@ export type Database = {
           created_at: string
           expires_at: string
           id: string
-          member_id: string
+          member_id: string | null
           token: string
           trip_id: string
         }
@@ -143,7 +143,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
-          member_id: string
+          member_id?: string | null
           token?: string
           trip_id: string
         }
@@ -152,7 +152,7 @@ export type Database = {
           created_at?: string
           expires_at?: string
           id?: string
-          member_id?: string
+          member_id?: string | null
           token?: string
           trip_id?: string
         }
@@ -237,6 +237,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_trip_invite: { Args: { invite_token: string }; Returns: Json }
       is_trip_member: { Args: { p_trip_id: string }; Returns: boolean }
       is_trip_owner: { Args: { p_trip_id: string }; Returns: boolean }
     }
