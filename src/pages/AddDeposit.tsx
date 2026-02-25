@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTrip } from "@/context/TripContext";
 import { useEffect } from "react";
 import { PageShell } from "@/components/PageShell";
+import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,6 +51,7 @@ export default function AddDeposit() {
   };
 
   return (
+    <>
     <PageShell title="Add Deposit" backTo="/dashboard">
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* ... keep existing code (form fields) */}
@@ -85,5 +87,7 @@ export default function AddDeposit() {
         <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0}>Add Deposit</Button>
       </form>
     </PageShell>
+    <BottomNav />
+    </>
   );
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTrip } from "@/context/TripContext";
 import { PageShell } from "@/components/PageShell";
+import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -166,6 +167,7 @@ export default function AddExpense() {
   };
 
   return (
+    <>
     <PageShell title="Add Expense" backTo="/dashboard">
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Amount */}
@@ -293,5 +295,7 @@ export default function AddExpense() {
         <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0}>Add Expense</Button>
       </form>
     </PageShell>
+    <BottomNav />
+    </>
   );
 }

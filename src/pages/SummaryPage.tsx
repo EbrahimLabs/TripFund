@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTrip } from "@/context/TripContext";
 import { PageShell } from "@/components/PageShell";
+import { BottomNav } from "@/components/BottomNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -158,6 +159,7 @@ export default function SummaryPage() {
   const sortedDates = Object.keys(txByDate).sort((a, b) => b.localeCompare(a));
 
   return (
+    <>
     <PageShell
         title="Summary"
         backTo="/dashboard"
@@ -424,5 +426,7 @@ export default function SummaryPage() {
           )}
         </div>
       </PageShell>
+    <BottomNav />
+    </>
   );
 }

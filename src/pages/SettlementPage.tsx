@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTrip } from "@/context/TripContext";
 import { PageShell } from "@/components/PageShell";
+import { BottomNav } from "@/components/BottomNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, PartyPopper } from "lucide-react";
@@ -59,6 +60,7 @@ export default function SettlementPage() {
   };
 
   return (
+    <>
     <PageShell title="Settlement" backTo="/dashboard">
       {settlements.length === 0 ? (
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12 space-y-3">
@@ -116,5 +118,7 @@ export default function SettlementPage() {
         </div>
       )}
     </PageShell>
+    <BottomNav />
+    </>
   );
 }

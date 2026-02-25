@@ -2,6 +2,7 @@ import { useTrip } from "@/context/TripContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { PageShell } from "@/components/PageShell";
+import { BottomNav } from "@/components/BottomNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowDownCircle, ArrowUpCircle, Wallet, TrendingUp, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,7 @@ export default function TripDashboard() {
   const categoryBreakdown = getCategoryBreakdown();
 
   return (
+    <>
     <PageShell title={activeTrip.name} icon={MapPin}>
       {/* Hero Balance Card */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
@@ -158,5 +160,7 @@ export default function TripDashboard() {
         </AnimatePresence>
       </div>
     </PageShell>
+    <BottomNav />
+    </>
   );
 }
