@@ -174,7 +174,7 @@ export function MemberDetailsContent({ trip, memberId, bottomNav }: MemberDetail
                                                                 {t.type === 'deposit' ? "+" : "-"}{trip.currency} {t.amount.toFixed(2)}
                                                             </p>
                                                         </div>
-                                                        {t.type === 'expense_share' && t.originTx.amount && (
+                                                        {t.type === 'expense_share' && t.originTx && t.originTx.amount && (
                                                             <div className="flex justify-end text-xs text-muted-foreground">
                                                                 <p>of {trip.currency} {t.originTx.amount.toFixed(0)} total</p>
                                                             </div>
