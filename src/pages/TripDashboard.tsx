@@ -299,7 +299,7 @@ export default function TripDashboard() {
         <div className="space-y-2">
           <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider">Members ({balances.length})</h2>
           <AnimatePresence>
-            {balances.map((b, i) => (
+            {[...balances].sort((a, b) => (activeTrip.fundManagerId === a.member.id ? -1 : activeTrip.fundManagerId === b.member.id ? 1 : 0)).map((b, i) => (
               <motion.div
                 key={b.member.id}
                 initial={{ opacity: 0, x: -20 }}
