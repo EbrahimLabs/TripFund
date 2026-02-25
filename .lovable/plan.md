@@ -1,52 +1,56 @@
 
 
-Based on exploring the codebase, here's what the app currently has and what features could enhance it:
+## Top Bar UI Improvement Plan
 
-**Current capabilities:** Trip creation, member management, fund manager designation, deposits, expenses with categories/subcategories, settlement calculations, summary/history, daily spending charts, and category breakdowns.
+### Current State
+The top bar (`PageShell`) is a thin sticky header with:
+- Trip name as gradient text (left)
+- Small 8x8 ghost icon buttons for theme toggle + action buttons (right)
+- `glass-strong` background with `px-4 py-3` padding
+- On the Index page, the top bar is just two tiny icons floating in the top-right corner
 
-Here are practical features that would add real value:
+The result feels cramped, utilitarian, and lacks visual identity. The icons are tiny (h-4 w-4 inside h-8 w-8 buttons) and hard to tap on mobile.
 
----
+### Proposed Changes
 
-### 1. Transaction Editing & Deletion
-Currently transactions can only be added. Allow users to tap a transaction in the summary to edit amounts, dates, categories, or delete it entirely with a confirmation dialog.
+**1. Redesigned `PageShell` header**
+- Add a back arrow (ChevronLeft or ArrowLeft from Lucide) on the left for sub-pages, giving clear navigation context
+- Make the title centered and slightly larger with better font weight
+- Increase touch target sizes from h-8 w-8 to h-9 w-9 with rounded-xl shape
+- Add a subtle bottom border separator using the glass-border variable
+- Increase vertical padding from py-3 to py-3.5 for more breathing room
+- Add a Framer Motion fade-in on the title for polish
 
-### 2. Receipt Photo Attachments
-Let users attach a photo (from camera or gallery) to each expense. Store as base64 in localStorage or use browser file storage. Show a thumbnail on the transaction card.
+**2. Redesigned Index page top bar**
+- Replace the floating icons with a proper top bar that includes the TripFund logo/icon (small Wallet icon) on the left, "TripFund" text, and action icons on the right
+- Consistent styling with PageShell header
 
-### 3. Export Trip Report (PDF / CSV)
-Generate a downloadable summary of the trip — all transactions, member balances, settlements, and category breakdown — as a CSV or styled PDF.
+**3. Dashboard-specific header enhancement**
+- Show a compact version of the trip name with a small MapPin icon prefix
+- Keep Settings and LogOut as action icons but with improved sizing
 
-### 4. Trip History & Archive
-Allow completed trips to be archived. Show a separate "Past Trips" section on the home screen so the active trip list stays clean.
+### Files to Modify
 
-### 5. Split Customization Improvements
-Currently expenses split evenly. Add options for:
-- **Unequal splits** (manual amounts per person)
-- **Percentage-based splits**
-- **Exclude members** from specific expenses (e.g., someone didn't eat dinner)
+| File | Change |
+|------|--------|
+| `src/components/PageShell.tsx` | Redesign header layout: optional back button, centered or left-aligned title with icon, larger touch targets, motion animation, bottom separator |
+| `src/pages/Index.tsx` | Replace floating top-right icons with a consistent top bar matching PageShell style |
+| `src/pages/TripDashboard.tsx` | Add MapPin icon next to trip name in the action prop |
 
-### 6. Recurring / Template Expenses
-For daily costs like hotel or transport, let users save an expense as a template and quickly re-add it with one tap.
+### Technical Details
 
-### 7. Notes & Comments on Transactions
-Add a richer note field or allow members to tag who was involved, add context like "paid at airport" etc.
+**PageShell updates:**
+- Add optional `backTo` prop (string path) to show a back button
+- Add optional `icon` prop (LucideIcon) to show an icon before the title
+- Wrap title in `motion.h1` with a subtle fade-in
+- Increase button sizes: `h-9 w-9` with `rounded-xl`
+- Icon sizes inside buttons: `h-[18px] w-[18px]` for better tap targets
 
-### 8. Dark Mode Toggle
-The app uses a clean light theme. Adding a dark mode toggle (using `next-themes` which is already installed) would improve usability at night.
+**Index page updates:**
+- Move the theme toggle and sign-out into a proper sticky top bar with `glass-strong` styling
+- Add small Wallet icon + "TripFund" branding on the left side of the bar
 
-### 9. Search & Filter Transactions
-In the summary page, add search by note/category and filters by date range, member, or transaction type.
-
-### 10. Settlement Tracking (Mark as Paid)
-Allow users to mark individual settlements as "completed" so the group can track who has actually paid back whom.
-
----
-
-### Recommended priority order
-1. Split customization (high practical value)
-2. Transaction editing/deletion (essential UX)
-3. Settlement tracking (completes the flow)
-4. Export report (trip conclusion feature)
-5. Dark mode (quick win, dependency already installed)
+**Animations:**
+- `motion.h1` with `initial={{ opacity: 0, x: -8 }}` and `animate={{ opacity: 1, x: 0 }}` for the page title
+- Spring transition for smoothness
 
