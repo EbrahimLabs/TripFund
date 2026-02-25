@@ -84,11 +84,11 @@ export function CategoryManager() {
             {/* Category header */}
             <div className="flex items-center gap-1.5 px-2 py-2">
               <div className="flex flex-col">
-                <button type="button" className="text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={catIdx === 0}
+                <button type="button" className="text-muted-foreground disabled:opacity-30" disabled={catIdx === 0}
                   onClick={() => reorderCategories(catIdx, catIdx - 1)}>
                   <ChevronUp className="h-3 w-3" />
                 </button>
-                <button type="button" className="text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={catIdx === categories.length - 1}
+                <button type="button" className="text-muted-foreground disabled:opacity-30" disabled={catIdx === categories.length - 1}
                   onClick={() => reorderCategories(catIdx, catIdx + 1)}>
                   <ChevronDown className="h-3 w-3" />
                 </button>
@@ -117,7 +117,7 @@ export function CategoryManager() {
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive hover:text-destructive"><Trash2 className="h-3 w-3" /></Button>
+                      <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-destructive"><Trash2 className="h-3 w-3" /></Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
@@ -159,11 +159,11 @@ export function CategoryManager() {
                     {cat.subcategories.map((sub, subIdx) => (
                       <div key={sub} className="flex items-center gap-1.5 rounded border bg-card px-2 py-1.5">
                         <div className="flex flex-col">
-                          <button type="button" className="text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={subIdx === 0}
+                          <button type="button" className="text-muted-foreground disabled:opacity-30" disabled={subIdx === 0}
                             onClick={() => reorderSubcategories(cat.name, subIdx, subIdx - 1)}>
                             <ChevronUp className="h-2.5 w-2.5" />
                           </button>
-                          <button type="button" className="text-muted-foreground hover:text-foreground disabled:opacity-30" disabled={subIdx === cat.subcategories.length - 1}
+                          <button type="button" className="text-muted-foreground disabled:opacity-30" disabled={subIdx === cat.subcategories.length - 1}
                             onClick={() => reorderSubcategories(cat.name, subIdx, subIdx + 1)}>
                             <ChevronDown className="h-2.5 w-2.5" />
                           </button>
@@ -184,7 +184,7 @@ export function CategoryManager() {
                             </Button>
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-destructive hover:text-destructive"><Trash2 className="h-2.5 w-2.5" /></Button>
+                                <Button variant="ghost" size="sm" className="h-5 w-5 p-0 text-destructive"><Trash2 className="h-2.5 w-2.5" /></Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>

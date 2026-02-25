@@ -117,7 +117,7 @@ export default function TripDashboard() {
                           className={`shrink-0 p-1.5 rounded-md transition-colors ${
                             activeTrip.fundManagerId === m.id
                               ? "text-primary bg-primary/10"
-                              : "text-muted-foreground/40 hover:text-muted-foreground"
+                              : "text-muted-foreground/40"
                           }`}
                         >
                           <Crown className="h-4 w-4" />

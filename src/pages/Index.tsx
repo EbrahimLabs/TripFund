@@ -88,7 +88,7 @@ const Index = () => {
         <AnimatePresence mode="wait">
           {!showCreate ? (
             <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-              <Button className="w-full h-12 text-base font-semibold gradient-primary glow-primary hover:opacity-90 transition-opacity border-0" onClick={() => setShowCreate(true)}>
+              <Button className="w-full h-12 text-base font-semibold gradient-primary glow-primary transition-opacity border-0" onClick={() => setShowCreate(true)}>
                 <Plus className="mr-2 h-5 w-5" /> New Trip
               </Button>
 
@@ -97,7 +97,7 @@ const Index = () => {
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Recent Trips</p>
                   {trips.map((trip, i) => (
                     <motion.div key={trip.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
-                      <Card className="cursor-pointer glass card-elevated hover:glow-sm transition-all duration-300 group">
+                      <Card className="cursor-pointer glass card-elevated transition-all duration-300 group">
                         <CardContent className="flex items-center gap-3 p-3">
                           <div className="flex items-center gap-3 flex-1 min-w-0" onClick={() => handleSelectTrip(trip.id)}>
                             <div className="flex items-center justify-center w-10 h-10 rounded-xl gradient-primary">
@@ -112,7 +112,7 @@ const Index = () => {
                           </div>
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive" onClick={(e) => e.stopPropagation()}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-muted-foreground" onClick={(e) => e.stopPropagation()}>
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </AlertDialogTrigger>
@@ -123,7 +123,7 @@ const Index = () => {
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteTrip(trip.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                                <AlertDialogAction onClick={() => handleDeleteTrip(trip.id)} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
@@ -155,7 +155,7 @@ const Index = () => {
                             className={`shrink-0 p-1.5 rounded-lg transition-all ${
                               fundManagerIndex === i
                                 ? "text-primary bg-primary/15 glow-sm"
-                                : "text-muted-foreground/40 hover:text-muted-foreground"
+                                : "text-muted-foreground/40"
                             }`}
                             title={fundManagerIndex === i ? "Fund Manager" : "Set as Fund Manager"}
                           >

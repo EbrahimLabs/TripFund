@@ -355,7 +355,7 @@ export default function SummaryPage() {
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive">
+                                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground">
                                     <Trash2 className="h-3 w-3" />
                                   </Button>
                                 </AlertDialogTrigger>
@@ -370,7 +370,7 @@ export default function SummaryPage() {
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
                                       onClick={async () => { await deleteTransaction(tx.id); toast.success("Transaction deleted!"); }}
-                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                      className="bg-destructive text-destructive-foreground"
                                     >
                                       Delete
                                     </AlertDialogAction>

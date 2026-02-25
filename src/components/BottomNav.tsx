@@ -27,7 +27,7 @@ export function BottomNav() {
                 "relative flex items-center justify-center rounded-full transition-all duration-300",
                 active
                   ? "bg-primary-foreground text-primary gap-1.5 px-4 py-2"
-                  : "text-primary-foreground/50 hover:text-primary-foreground/80 p-2.5"
+                  : "text-primary-foreground/50 p-2.5"
               )}
             >
               {active && (

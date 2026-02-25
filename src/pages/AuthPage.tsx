@@ -122,7 +122,7 @@ export default function AuthPage() {
                   )}
 
                   {mode === "login" && (
-                    <button type="button" onClick={() => setMode("forgot")} className="text-xs text-primary hover:underline">
+                    <button type="button" onClick={() => setMode("forgot")} className="text-xs text-primary underline">
                       Forgot password?
                     </button>
                   )}
@@ -148,11 +148,11 @@ export default function AuthPage() {
 
                 <div className="mt-4 text-center text-sm text-muted-foreground">
                   {mode === "login" ? (
-                    <>Don't have an account? <button onClick={() => setMode("signup")} className="text-primary font-medium hover:underline">Sign up</button></>
+                    <>Don't have an account? <button onClick={() => setMode("signup")} className="text-primary font-medium underline">Sign up</button></>
                   ) : mode === "signup" ? (
-                    <>Already have an account? <button onClick={() => setMode("login")} className="text-primary font-medium hover:underline">Sign in</button></>
+                    <>Already have an account? <button onClick={() => setMode("login")} className="text-primary font-medium underline">Sign in</button></>
                   ) : (
-                    <button onClick={() => setMode("login")} className="text-primary font-medium hover:underline">Back to sign in</button>
+                    <button onClick={() => setMode("login")} className="text-primary font-medium underline">Back to sign in</button>
                   )}
                 </div>
               </CardContent>
