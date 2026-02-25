@@ -10,11 +10,11 @@ interface PageShellProps {
 
 export function PageShell({ title, children, className, action }: PageShellProps) {
   return (
-    <div className={cn("min-h-screen pb-24 mesh-bg", className)}>
-      <header className="sticky top-0 z-40 glass-strong px-4 py-3">
+    <div className={cn("min-h-screen pb-24 bg-background", className)}>
+      <header className="sticky top-0 z-40 glass-strong px-4 py-2.5">
         <div className="mx-auto flex max-w-lg items-center justify-between">
-          <h1 className="text-lg font-display font-bold tracking-tight gradient-text">{title}</h1>
-          <div className="flex items-center gap-1">
+          <h1 className="text-sm font-semibold tracking-tight text-foreground">{title}</h1>
+          <div className="flex items-center gap-0.5">
             <ThemeToggle />
             {action}
           </div>
