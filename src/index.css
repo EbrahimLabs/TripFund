@@ -69,19 +69,19 @@
     --background: 0 0% 0%;
     --foreground: 228 15% 95%;
 
-    --card: 228 15% 6%;
+    --card: 228 12% 10%;
     --card-foreground: 228 15% 95%;
 
-    --popover: 228 15% 5%;
+    --popover: 228 12% 9%;
     --popover-foreground: 228 15% 95%;
 
     --primary: 230 90% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 228 12% 10%;
+    --secondary: 228 10% 13%;
     --secondary-foreground: 228 15% 90%;
 
-    --muted: 228 12% 8%;
+    --muted: 228 10% 11%;
     --muted-foreground: 228 10% 55%;
 
     --accent: 215 80% 55%;
@@ -99,18 +99,18 @@
     --deposit: 230 90% 60%;
     --expense: 0 62% 55%;
 
-    --border: 228 10% 14%;
-    --input: 228 12% 12%;
+    --border: 228 10% 18%;
+    --input: 228 12% 14%;
     --ring: 230 90% 60%;
 
     --gradient-primary: linear-gradient(135deg, hsl(230, 90%, 52%) 0%, hsl(222, 85%, 50%) 40%, hsl(215, 80%, 48%) 100%);
     --gradient-hero: linear-gradient(160deg, hsl(0, 0%, 2%) 0%, hsl(228, 15%, 3%) 35%, hsl(215, 10%, 2%) 65%, hsl(0, 0%, 0%) 100%);
     --gradient-card: linear-gradient(135deg, hsl(230, 80%, 42%) 0%, hsl(222, 75%, 44%) 30%, hsl(215, 70%, 45%) 60%, hsl(240, 58%, 46%) 100%);
-    --glass-bg: hsla(0, 0%, 4%, 0.8);
-    --glass-border: hsla(230, 30%, 20%, 0.4);
+    --glass-bg: hsla(228, 15%, 10%, 0.85);
+    --glass-border: hsla(230, 25%, 28%, 0.5);
     --glass-shadow: 0 8px 32px hsla(0, 0%, 0%, 0.4);
 
-    --sidebar-background: 0 0% 2%;
+    --sidebar-background: 0 0% 3%;
     --sidebar-foreground: 228 15% 90%;
     --sidebar-primary: 230 90% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
