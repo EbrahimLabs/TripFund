@@ -337,11 +337,13 @@ export function useTripStore() {
     return activeTrip?.members.find((m) => m.id === id)?.name || "Unknown";
   }, [activeTrip]);
 
-  const createInvite = useCallback(async (memberId: string) => {
+  const createInvite = useCallback(async (memberId?: string) => {
     if (!activeTripId) return null;
+    const insertObj: any = { trip_id: activeTripId };
+    if (memberId) insertObj.member_id = memberId;
     const { data, error } = await supabase
       .from("trip_invites")
-      .insert({ trip_id: activeTripId, member_id: memberId })
+      .insert(insertObj)
       .select("token")
       .single();
     if (error || !data) { if (import.meta.env.DEV) console.error(error); return null; }

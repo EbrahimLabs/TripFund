@@ -8,22 +8,11 @@ import { Wallet, UserPlus, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
-interface InviteData {
-  id: string;
-  trip_id: string;
-  member_id: string;
-  token: string;
-  accepted_by: string | null;
-  expires_at: string;
-  tripName: string;
-  memberName: string;
-}
-
 export default function InvitePage() {
   const { token } = useParams<{ token: string }>();
   const { user } = useAuthContext();
   const navigate = useNavigate();
-  const [invite, setInvite] = useState<InviteData | null>(null);
+  const [tripName, setTripName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,49 +23,34 @@ export default function InvitePage() {
     (async () => {
       const { data, error: fetchErr } = await supabase
         .from("trip_invites")
-        .select("*")
+        .select("*, trips(name)")
         .eq("token", token)
         .single();
 
       if (fetchErr || !data) { setError("Invite not found"); setLoading(false); return; }
-
       if (data.accepted_by) { setError("This invite has already been used"); setLoading(false); return; }
       if (new Date(data.expires_at) < new Date()) { setError("This invite has expired"); setLoading(false); return; }
 
-      // Fetch trip name and member name
-      const [{ data: trip }, { data: member }] = await Promise.all([
-        supabase.from("trips").select("name").eq("id", data.trip_id).single(),
-        supabase.from("trip_members").select("display_name").eq("id", data.member_id).single(),
-      ]);
-
-      setInvite({
-        ...data,
-        tripName: trip?.name || "Unknown Trip",
-        memberName: member?.display_name || "Unknown Member",
-      });
+      setTripName((data as any).trips?.name || "Unknown Trip");
       setLoading(false);
     })();
   }, [token]);
 
   const handleAccept = async () => {
-    if (!invite || !user) return;
+    if (!token || !user) return;
     setAccepting(true);
 
-    // Link user_id to the trip member
-    const { error: memberErr } = await supabase
-      .from("trip_members")
-      .update({ user_id: user.id })
-      .eq("id", invite.member_id);
+    const { data, error: rpcErr } = await supabase.rpc("accept_trip_invite", {
+      invite_token: token,
+    });
 
-    if (memberErr) { toast.error("Failed to join trip"); setAccepting(false); return; }
+    if (rpcErr || (data as any)?.error) {
+      toast.error((data as any)?.error || "Failed to join trip");
+      setAccepting(false);
+      return;
+    }
 
-    // Mark invite as accepted
-    await supabase
-      .from("trip_invites")
-      .update({ accepted_by: user.id })
-      .eq("id", invite.id);
-
-    toast.success(`Joined "${invite.tripName}" as ${invite.memberName}!`);
+    toast.success(`Joined "${tripName}"!`);
     navigate("/");
   };
 
@@ -104,15 +78,11 @@ export default function InvitePage() {
               </div>
             )}
 
-            {invite && !error && (
+            {tripName && !error && !loading && (
               <div className="space-y-4">
                 <div>
                   <p className="text-muted-foreground text-xs uppercase tracking-wider mb-1">You're invited to</p>
-                  <p className="text-lg font-display font-bold">{invite.tripName}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs uppercase tracking-wider mb-1">As</p>
-                  <p className="text-base font-display font-semibold">{invite.memberName}</p>
+                  <p className="text-lg font-display font-bold">{tripName}</p>
                 </div>
                 <Button
                   onClick={handleAccept}
@@ -120,7 +90,7 @@ export default function InvitePage() {
                   className="w-full gradient-primary glow-primary border-0"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
-                  {accepting ? "Joining..." : `Join as ${invite.memberName}`}
+                  {accepting ? "Joining..." : "Join Trip"}
                 </Button>
               </div>
             )}
