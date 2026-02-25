@@ -9,7 +9,7 @@
     --background: 228 20% 97%;
     --foreground: 228 30% 10%;
 
-    --card: 0 0% 100%;
+    --card: 228 15% 93%;
     --card-foreground: 228 30% 10%;
 
     --popover: 0 0% 100%;
@@ -39,7 +39,7 @@
     --deposit: 230 98% 55%;
     --expense: 0 72% 51%;
 
-    --border: 228 15% 90%;
+    --border: 228 12% 85%;
     --input: 228 15% 90%;
     --ring: 230 98% 55%;
 
@@ -69,7 +69,7 @@
     --background: 228 25% 7%;
     --foreground: 228 15% 95%;
 
-    --card: 228 20% 12%;
+    --card: 228 18% 14%;
     --card-foreground: 228 15% 95%;
 
     --popover: 228 20% 12%;
@@ -99,7 +99,7 @@
     --deposit: 230 90% 60%;
     --expense: 0 62% 55%;
 
-    --border: 228 15% 20%;
+    --border: 228 12% 22%;
     --input: 228 15% 20%;
     --ring: 230 90% 60%;
 
