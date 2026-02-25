@@ -141,7 +141,7 @@ export function useTripStore() {
       .select()
       .single();
 
-    if (error || !trip) { console.error(error); return null; }
+    if (error || !trip) { if (import.meta.env.DEV) console.error(error); return null; }
 
     const memberInserts = memberNames.map((n, i) => ({
       trip_id: trip.id,
@@ -214,7 +214,7 @@ export function useTripStore() {
       .select()
       .single();
 
-    if (error || !inserted) { console.error(error); return; }
+    if (error || !inserted) { if (import.meta.env.DEV) console.error(error); return; }
 
     if (tx.splits && tx.splits.length > 0) {
       const splitInserts = tx.splits.map((s) => ({
