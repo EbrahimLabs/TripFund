@@ -276,7 +276,7 @@ export default function AddExpense() {
               {activeTrip.members.map((m) => {
                 const isSelected = selectedMembers.includes(m.id);
                 return (
-                  <label key={m.id} className="flex items-center gap-3 rounded-xl glass p-3 cursor-pointer hover:glow-sm transition-all">
+                  <label key={m.id} className="flex items-center gap-3 rounded-xl glass p-3 cursor-pointer transition-all">
                     <Checkbox checked={isSelected} onCheckedChange={() => toggleMember(m.id)} />
                     <span className="text-sm font-medium flex-1 flex items-center gap-1.5">
                       {m.name}
