@@ -33,6 +33,7 @@ export default function AddExpense() {
   const [customAmounts, setCustomAmounts] = useState<Record<string, string>>({});
   const [percentages, setPercentages] = useState<Record<string, string>>({});
 
+  const [submitting, setSubmitting] = useState(false);
   const [showAddCat, setShowAddCat] = useState(false);
   const [newCategory, setNewCategory] = useState("");
   const [showAddSub, setShowAddSub] = useState(false);
@@ -128,6 +129,7 @@ export default function AddExpense() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
     const splits = computeSplits();
     if (!splits) {
       if (splitMode === "unequal") toast.error("Custom amounts must equal the total!");
@@ -135,6 +137,7 @@ export default function AddExpense() {
       return;
     }
 
+    setSubmitting(true);
     await addTransaction({
       type: "expense",
       amount: parseFloat(amount),
@@ -149,6 +152,7 @@ export default function AddExpense() {
     setNote("");
     setSelectedMembers(activeTrip.members.map((m) => m.id));
     setSplitMode("equal");
+    setSubmitting(false);
   };
 
   const amt = parseFloat(amount) || 0;
@@ -292,7 +296,7 @@ export default function AddExpense() {
             <Textarea id="expNote" placeholder="e.g., Dinner at the beach" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="glass" />
           </div>
 
-          <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0}>Add Expense</Button>
+          <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0 || submitting}>{submitting ? "Adding..." : "Add Expense"}</Button>
         </form>
       </PageShell>
       <BottomNav />
