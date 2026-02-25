@@ -232,7 +232,7 @@ export default function SummaryPage() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="all">All Members</SelectItem>
-                          {activeTrip.members.map((m) => (
+                          {[...activeTrip.members].sort((a, b) => (activeTrip.fundManagerId === a.id ? -1 : activeTrip.fundManagerId === b.id ? 1 : 0)).map((m) => (
                             <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
                           ))}
                         </SelectContent>

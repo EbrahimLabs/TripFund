@@ -273,7 +273,7 @@ export default function AddExpense() {
               </div>
             </div>
             <div className="space-y-1.5">
-              {activeTrip.members.map((m) => {
+              {[...activeTrip.members].sort((a, b) => (activeTrip.fundManagerId === a.id ? -1 : activeTrip.fundManagerId === b.id ? 1 : 0)).map((m) => {
                 const isSelected = selectedMembers.includes(m.id);
                 return (
                   <label key={m.id} className="flex items-center gap-3 rounded-xl glass p-3 cursor-pointer transition-all">
