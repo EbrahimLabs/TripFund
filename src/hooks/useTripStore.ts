@@ -63,7 +63,18 @@ export interface Trip {
 export function useTripStore() {
   const { user } = useAuthContext();
   const [trips, setTrips] = useState<Trip[]>([]);
-  const [activeTripId, setActiveTripId] = useState<string | null>(null);
+  const [activeTripId, _setActiveTripId] = useState<string | null>(
+    () => localStorage.getItem("activeTripId")
+  );
+
+  const setActiveTripId = useCallback((id: string | null) => {
+    _setActiveTripId(id);
+    if (id) {
+      localStorage.setItem("activeTripId", id);
+    } else {
+      localStorage.removeItem("activeTripId");
+    }
+  }, []);
   const [loading, setLoading] = useState(true);
 
   const activeTrip = trips.find((t) => t.id === activeTripId) || null;
