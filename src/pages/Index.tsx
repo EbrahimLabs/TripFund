@@ -57,7 +57,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative gradient-hero mesh-bg">
-      <header className="fixed top-0 left-0 right-0 z-40 glass-strong px-4 py-3.5" style={{ borderBottom: '1px solid var(--glass-border)' }}>
+      <header className="fixed top-0 left-0 right-0 z-40 px-4 py-3.5 backdrop-blur-md bg-background/60" style={{ maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)' }}>
         <div className="mx-auto flex max-w-lg items-center gap-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <div className="flex items-center justify-center w-7 h-7 rounded-lg gradient-primary shrink-0">
