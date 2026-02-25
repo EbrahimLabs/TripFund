@@ -1,7 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, PlusCircle, Receipt, Handshake, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -15,8 +14,8 @@ export function BottomNav() {
   const { pathname } = useLocation();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong safe-area-bottom">
-      <div className="mx-auto flex max-w-lg items-center justify-around py-1.5">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-border bg-background/90 backdrop-blur-xl safe-area-bottom">
+      <div className="mx-auto flex max-w-lg items-center justify-around py-1">
         {navItems.map(({ to, icon: Icon, label }) => {
           const active = pathname === to;
           return (
@@ -24,21 +23,14 @@ export function BottomNav() {
               key={to}
               to={to}
               className={cn(
-                "relative flex flex-col items-center gap-0.5 px-3 py-1.5 text-[10px] font-medium transition-all rounded-xl",
+                "relative flex flex-col items-center gap-0.5 px-3 py-1.5 text-[10px] font-medium transition-colors",
                 active
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {active && (
-                <motion.div
-                  layoutId="nav-active"
-                  className="absolute inset-0 rounded-xl bg-primary/10 glow-sm"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-              <Icon className={cn("h-5 w-5 relative z-10", active && "stroke-[2.5]")} />
-              <span className="relative z-10">{label}</span>
+              <Icon className={cn("h-[18px] w-[18px]", active && "stroke-[2.5]")} />
+              <span>{label}</span>
             </Link>
           );
         })}
