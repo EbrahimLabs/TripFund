@@ -5,7 +5,7 @@ import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
-import { ArrowDownCircle, ArrowUpCircle, Wallet, LogOut, Settings, Plus, TrendingUp, Crown, MapPin } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Wallet, LogOut, Settings, Plus, TrendingUp, Crown, MapPin, Link2, UserCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -29,10 +29,12 @@ export default function TripDashboard() {
     activeTrip, getStats, getMemberBalances, setActiveTripId,
     getDailyExpenses, getCategoryBreakdown,
     editTripDetails, addMember, renameMember, setFundManager,
+    createInvite, getMemberUserIds,
   } = useTrip();
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
   const [tripName, setTripName] = useState("");
+  const [memberUserIds, setMemberUserIds] = useState<Record<string, string | null>>({});
   
   const [newMemberName, setNewMemberName] = useState("");
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
@@ -42,8 +44,9 @@ export default function TripDashboard() {
     if (!activeTrip) navigate("/");
     else {
       setTripName(activeTrip.name);
+      getMemberUserIds().then(setMemberUserIds);
     }
-  }, [activeTrip, navigate]);
+  }, [activeTrip, navigate, getMemberUserIds]);
 
   if (!activeTrip) return null;
 
@@ -73,6 +76,18 @@ export default function TripDashboard() {
       await renameMember(id, editMemberName.trim());
       setEditingMemberId(null);
       setEditMemberName("");
+    }
+  };
+
+  const handleInvite = async (memberId: string) => {
+    const token = await createInvite(memberId);
+    if (!token) { toast.error("Failed to create invite"); return; }
+    const url = `${window.location.origin}/invite/${token}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: "TripFund Invite", text: `Join "${activeTrip!.name}" on TripFund`, url }); } catch {}
+    } else {
+      await navigator.clipboard.writeText(url);
+      toast.success("Invite link copied!");
     }
   };
 
@@ -140,6 +155,15 @@ export default function TripDashboard() {
                               {m.name}
                               {activeTrip.fundManagerId === m.id && <FundManagerBadge />}
                             </span>
+                            {memberUserIds[m.id] ? (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <UserCheck className="h-3 w-3" /> Linked
+                              </span>
+                            ) : (
+                              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => handleInvite(m.id)}>
+                                <Link2 className="h-3 w-3 mr-1" /> Invite
+                              </Button>
+                            )}
                             <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setEditingMemberId(m.id); setEditMemberName(m.name); }}>
                               Rename
                             </Button>
