@@ -297,7 +297,7 @@ export default function TripDashboard() {
 
         {/* Member balances */}
         <div className="space-y-2">
-          <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider">Members</h2>
+          <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider">Members ({balances.length})</h2>
           <AnimatePresence>
             {balances.map((b, i) => (
               <motion.div
