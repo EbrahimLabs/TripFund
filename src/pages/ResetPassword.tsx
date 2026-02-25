@@ -43,21 +43,21 @@ export default function ResetPassword() {
           </div>
           <h1 className="text-2xl font-display font-bold gradient-text">Set New Password</h1>
         </div>
-        <Card className="glass card-elevated border-0 p-5">
+        <Card className="glass card-elevated p-5">
           <CardContent className="p-0">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label>New Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 glass border-0" placeholder="••••••••" autoFocus />
+                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 glass" placeholder="••••••••" autoFocus />
                 </div>
               </div>
               <div className="space-y-1.5">
                 <Label>Confirm Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="pl-9 glass border-0" placeholder="••••••••" />
+                  <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="pl-9 glass" placeholder="••••••••" />
                 </div>
               </div>
               <Button type="submit" className="w-full h-11 gradient-primary glow-primary border-0 font-semibold" disabled={loading}>

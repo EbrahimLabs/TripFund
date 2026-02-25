@@ -97,7 +97,7 @@ const Index = () => {
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Recent Trips</p>
                   {trips.map((trip, i) => (
                     <motion.div key={trip.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
-                      <Card className="cursor-pointer glass card-elevated hover:glow-sm transition-all duration-300 group border-0">
+                      <Card className="cursor-pointer glass card-elevated hover:glow-sm transition-all duration-300 group">
                         <CardContent className="flex items-center gap-3 p-3">
                           <div className="flex items-center gap-3 flex-1 min-w-0" onClick={() => handleSelectTrip(trip.id)}>
                             <div className="flex items-center justify-center w-10 h-10 rounded-xl gradient-primary">
@@ -136,11 +136,11 @@ const Index = () => {
             </motion.div>
           ) : (
             <motion.div key="create" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} className="space-y-5">
-              <Card className="glass card-elevated border-0 p-5">
+              <Card className="glass card-elevated p-5">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="tripName">Trip Name</Label>
-                    <Input id="tripName" placeholder="e.g., Bali 2025" value={tripName} onChange={(e) => setTripName(e.target.value)} autoFocus className="glass border-0" />
+                    <Input id="tripName" placeholder="e.g., Bali 2025" value={tripName} onChange={(e) => setTripName(e.target.value)} autoFocus className="glass" />
                   </div>
 
                   <div className="space-y-2">
@@ -165,7 +165,7 @@ const Index = () => {
                             placeholder={`Member ${i + 1}`}
                             value={m}
                             onChange={(e) => updateMember(i, e.target.value)}
-                            className="glass border-0"
+                            className="glass"
                           />
                           {members.length > 1 && (
                             <Button variant="ghost" size="icon" onClick={() => removeMember(i)} className="shrink-0">
@@ -175,13 +175,13 @@ const Index = () => {
                         </div>
                       ))}
                     </div>
-                    <Button variant="outline" size="sm" onClick={addMemberField} className="w-full glass border-0">
+                    <Button variant="outline" size="sm" onClick={addMemberField} className="w-full glass">
                       <Plus className="mr-1 h-4 w-4" /> Add Member
                     </Button>
                   </div>
 
                   <div className="flex gap-2 pt-2">
-                    <Button variant="outline" className="flex-1 glass border-0" onClick={() => setShowCreate(false)}>Cancel</Button>
+                    <Button variant="outline" className="flex-1 glass" onClick={() => setShowCreate(false)}>Cancel</Button>
                     <Button className="flex-1 gradient-primary glow-primary border-0" onClick={handleCreate} disabled={!tripName.trim() || members.filter((m) => m.trim()).length < 2}>
                       Create Trip
                     </Button>

@@ -183,7 +183,7 @@ export default function AddExpense() {
               min="0"
               step="0.01"
               autoFocus
-              className="text-2xl font-display font-bold h-14 glass border-0"
+              className="text-2xl font-display font-bold h-14 glass"
             />
           </div>
 
@@ -198,7 +198,7 @@ export default function AddExpense() {
             <AnimatePresence>
               {showAddCat && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden">
-                  <Input placeholder="New category..." value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="h-8 text-xs glass border-0" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCategory(); } }} />
+                  <Input placeholder="New category..." value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="h-8 text-xs glass" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCategory(); } }} />
                   <Button type="button" size="sm" className="h-8 text-xs gradient-primary border-0" onClick={handleAddCategory}>Add</Button>
                 </motion.div>
               )}
@@ -211,7 +211,7 @@ export default function AddExpense() {
                   variant={category === cat ? "default" : "outline"}
                   size="sm"
                   onClick={() => setCategory(cat)}
-                  className={`text-xs transition-all ${category === cat ? "gradient-primary glow-sm border-0" : "glass border-0"}`}
+                  className={`text-xs transition-all ${category === cat ? "gradient-primary glow-sm border-0" : "glass"}`}
                 >
                   {cat}
                 </Button>
@@ -231,7 +231,7 @@ export default function AddExpense() {
               <AnimatePresence>
                 {showAddSub && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden">
-                    <Input placeholder="New subcategory..." value={newSubcategory} onChange={(e) => setNewSubcategory(e.target.value)} className="h-8 text-xs glass border-0" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSubcategory(); } }} />
+                    <Input placeholder="New subcategory..." value={newSubcategory} onChange={(e) => setNewSubcategory(e.target.value)} className="h-8 text-xs glass" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSubcategory(); } }} />
                     <Button type="button" size="sm" className="h-8 text-xs gradient-primary border-0" onClick={handleAddSubcategory}>Add</Button>
                   </motion.div>
                 )}
@@ -276,7 +276,7 @@ export default function AddExpense() {
               {activeTrip.members.map((m) => {
                 const isSelected = selectedMembers.includes(m.id);
                 return (
-                  <label key={m.id} className="flex items-center gap-3 rounded-xl glass border-0 p-3 cursor-pointer hover:glow-sm transition-all">
+                  <label key={m.id} className="flex items-center gap-3 rounded-xl glass p-3 cursor-pointer hover:glow-sm transition-all">
                     <Checkbox checked={isSelected} onCheckedChange={() => toggleMember(m.id)} />
                     <span className="text-sm font-medium flex-1 flex items-center gap-1.5">
                       {m.name}
@@ -290,7 +290,7 @@ export default function AddExpense() {
                         placeholder="0"
                         value={customAmounts[m.id] || ""}
                         onChange={(e) => setCustomAmounts((prev) => ({ ...prev, [m.id]: e.target.value }))}
-                        className="h-7 w-20 text-xs text-right glass border-0"
+                        className="h-7 w-20 text-xs text-right glass"
                         onClick={(e) => e.stopPropagation()}
                       />
                     )}
@@ -303,7 +303,7 @@ export default function AddExpense() {
                           placeholder="0"
                           value={percentages[m.id] || ""}
                           onChange={(e) => setPercentages((prev) => ({ ...prev, [m.id]: e.target.value }))}
-                          className="h-7 w-16 text-xs text-right glass border-0"
+                          className="h-7 w-16 text-xs text-right glass"
                           onClick={(e) => e.stopPropagation()}
                         />
                         <span className="text-xs text-muted-foreground">%</span>
@@ -337,13 +337,13 @@ export default function AddExpense() {
           {/* Date */}
           <div className="space-y-2">
             <Label htmlFor="expDate">Date</Label>
-            <Input id="expDate" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="glass border-0" />
+            <Input id="expDate" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="glass" />
           </div>
 
           {/* Note */}
           <div className="space-y-2">
             <Label htmlFor="expNote">Note (optional)</Label>
-            <Textarea id="expNote" placeholder="e.g., Dinner at the beach" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="glass border-0" />
+            <Textarea id="expNote" placeholder="e.g., Dinner at the beach" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="glass" />
           </div>
 
           <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0}>
