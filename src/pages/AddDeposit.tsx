@@ -79,7 +79,7 @@ export default function AddDeposit() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {activeTrip.members.map((m) => (
+              {[...activeTrip.members].sort((a, b) => (activeTrip.fundManagerId === a.id ? -1 : activeTrip.fundManagerId === b.id ? 1 : 0)).map((m) => (
                 <Button
                   key={m.id}
                   type="button"

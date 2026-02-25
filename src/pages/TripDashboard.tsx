@@ -110,7 +110,7 @@ export default function TripDashboard() {
 
                   <TabsContent value="members" className="space-y-3 mt-4">
                     <p className="text-xs text-muted-foreground">Tap the crown to set as Fund Manager</p>
-                    {activeTrip.members.map((m) => (
+                    {[...activeTrip.members].sort((a, b) => (activeTrip.fundManagerId === a.id ? -1 : activeTrip.fundManagerId === b.id ? 1 : 0)).map((m) => (
                       <div key={m.id} className="flex items-center gap-2">
                         <button
                           type="button"
