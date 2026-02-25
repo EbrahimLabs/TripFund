@@ -27,19 +27,19 @@ export default function AddDeposit() {
 
   if (!activeTrip) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const amt = parseFloat(amount);
     if (!amt || amt <= 0 || selectedMembers.length === 0) return;
-    selectedMembers.forEach((mid) => {
-      addTransaction({
+    for (const mid of selectedMembers) {
+      await addTransaction({
         type: "deposit",
         amount: amt,
         date,
         note,
         memberId: mid,
       });
-    });
+    }
     toast.success(`Deposit added for ${selectedMembers.length} member${selectedMembers.length > 1 ? "s" : ""}!`);
     setAmount("");
     setNote("");

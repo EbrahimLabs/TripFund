@@ -52,25 +52,25 @@ export default function TripDashboard() {
   const dailyExpenses = getDailyExpenses();
   const categoryBreakdown = getCategoryBreakdown();
 
-  const handleSaveSettings = () => {
+  const handleSaveSettings = async () => {
     if (tripName.trim()) {
-      editTripDetails(tripName.trim(), "BDT");
+      await editTripDetails(tripName.trim(), "BDT");
       toast.success("Trip updated!");
       setShowSettings(false);
     }
   };
 
-  const handleAddMember = () => {
+  const handleAddMember = async () => {
     if (newMemberName.trim()) {
-      addMember(newMemberName.trim());
+      await addMember(newMemberName.trim());
       setNewMemberName("");
       toast.success("Member added!");
     }
   };
 
-  const handleRenameMember = (id: string) => {
+  const handleRenameMember = async (id: string) => {
     if (editMemberName.trim()) {
-      renameMember(id, editMemberName.trim());
+      await renameMember(id, editMemberName.trim());
       setEditingMemberId(null);
       setEditMemberName("");
     }
@@ -113,7 +113,7 @@ export default function TripDashboard() {
                       <div key={m.id} className="flex items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => setFundManager(activeTrip.fundManagerId === m.id ? undefined : m.id)}
+                          onClick={async () => await setFundManager(activeTrip.fundManagerId === m.id ? undefined : m.id)}
                           className={`shrink-0 p-1.5 rounded-md transition-colors ${
                             activeTrip.fundManagerId === m.id
                               ? "text-primary bg-primary/10"
