@@ -48,21 +48,27 @@ function OwnerRoute({ children }: { children: React.ReactNode }) {
 
 function TripLayout() {
   return (
+    <Routes>
+      <Route path="/dashboard" element={<TripDashboard />} />
+      <Route path="/deposit" element={<OwnerRoute><AddDeposit /></OwnerRoute>} />
+      <Route path="/expense" element={<OwnerRoute><AddExpense /></OwnerRoute>} />
+      <Route path="/settle" element={<SettlementPage />} />
+      <Route path="/summary" element={<SummaryPage />} />
+      <Route path="/settings" element={<OwnerRoute><TripSettings /></OwnerRoute>} />
+      <Route path="/account" element={<AccountPage />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
+
+function AppShell({ children }: { children: React.ReactNode }) {
+  return (
     <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen flex w-full">
-        <AppSidebar />
         <main className="flex-1 w-full">
-          <Routes>
-            <Route path="/dashboard" element={<TripDashboard />} />
-            <Route path="/deposit" element={<OwnerRoute><AddDeposit /></OwnerRoute>} />
-            <Route path="/expense" element={<OwnerRoute><AddExpense /></OwnerRoute>} />
-            <Route path="/settle" element={<SettlementPage />} />
-            <Route path="/summary" element={<SummaryPage />} />
-            <Route path="/settings" element={<OwnerRoute><TripSettings /></OwnerRoute>} />
-            <Route path="/account" element={<AccountPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          {children}
         </main>
+        <AppSidebar />
       </div>
     </SidebarProvider>
   );
@@ -78,12 +84,14 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<AuthRoute><AuthPage /></AuthRoute>} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/invite/:token" element={<ProtectedRoute><InvitePage /></ProtectedRoute>} />
-            <Route path="/" element={<ProtectedRoute><TripProvider><Index /></TripProvider></ProtectedRoute>} />
+            <Route path="/invite/:token" element={<ProtectedRoute><AppShell><InvitePage /></AppShell></ProtectedRoute>} />
+            <Route path="/" element={<ProtectedRoute><TripProvider><AppShell><Index /></AppShell></TripProvider></ProtectedRoute>} />
             <Route path="/*" element={
               <ProtectedRoute>
                 <TripProvider>
-                  <TripLayout />
+                  <AppShell>
+                    <TripLayout />
+                  </AppShell>
                 </TripProvider>
               </ProtectedRoute>
             } />

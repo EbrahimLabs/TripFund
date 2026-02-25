@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, X, MapPin, Wallet, Trash2, Crown, UserCircle } from "lucide-react";
+import { Plus, X, MapPin, Wallet, Trash2, Crown, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { FundManagerBadge } from "@/components/FundManagerBadge";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { useSidebar } from "@/components/ui/sidebar";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -20,6 +20,8 @@ const Index = () => {
   const { trips, createTrip, setActiveTripId, deleteTrip } = useTrip();
   const { user } = useAuthContext();
   const navigate = useNavigate();
+  let sidebarCtx: ReturnType<typeof useSidebar> | null = null;
+  try { sidebarCtx = useSidebar(); } catch {}
   const [showCreate, setShowCreate] = useState(false);
   const [tripName, setTripName] = useState("");
   const [members, setMembers] = useState<string[]>([""]);
@@ -63,12 +65,11 @@ const Index = () => {
             </div>
             <span className="text-lg font-display font-bold tracking-tight gradient-text">TripFund</span>
           </div>
-          <div className="flex items-center gap-1 shrink-0">
-            <ThemeToggle />
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-muted-foreground" onClick={() => navigate("/account")} title="Account">
-              <UserCircle className="h-[18px] w-[18px]" />
+          {sidebarCtx && (
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-muted-foreground" onClick={() => sidebarCtx!.setOpenMobile(true)}>
+              <Menu className="h-[18px] w-[18px]" />
             </Button>
-          </div>
+          )}
         </div>
       </header>
 

@@ -24,7 +24,7 @@ export function PageShell({ title, children, className, action, backTo, icon: Ic
     <div className={cn("min-h-screen pb-24 mesh-bg", className)}>
       <header className="sticky top-0 z-40 glass-strong px-4 py-3.5" style={{ borderBottom: '1px solid var(--glass-border)' }}>
         <div className="mx-auto flex max-w-lg items-center gap-2">
-          {backTo ? (
+          {backTo && (
             <Button
               variant="ghost"
               size="icon"
@@ -33,16 +33,7 @@ export function PageShell({ title, children, className, action, backTo, icon: Ic
             >
               <ChevronLeft className="h-[18px] w-[18px]" />
             </Button>
-          ) : sidebarCtx ? (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 shrink-0 rounded-xl text-muted-foreground"
-              onClick={() => sidebarCtx!.setOpenMobile(true)}
-            >
-              <Menu className="h-[18px] w-[18px]" />
-            </Button>
-          ) : null}
+          )}
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {Icon && (
               <div className="flex items-center justify-center w-7 h-7 rounded-lg gradient-primary shrink-0">
@@ -58,7 +49,19 @@ export function PageShell({ title, children, className, action, backTo, icon: Ic
               {title}
             </motion.h1>
           </div>
-          {action && <div className="flex items-center gap-1 shrink-0">{action}</div>}
+          <div className="flex items-center gap-1 shrink-0">
+            {action}
+            {sidebarCtx && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-xl text-muted-foreground"
+                onClick={() => sidebarCtx!.setOpenMobile(true)}
+              >
+                <Menu className="h-[18px] w-[18px]" />
+              </Button>
+            )}
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-lg px-4 py-4 animate-fade-in relative z-10">

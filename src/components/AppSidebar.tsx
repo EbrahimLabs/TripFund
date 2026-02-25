@@ -1,5 +1,5 @@
 import {
-  Settings, LogOut, UserCircle, Share2, Sun, Moon,
+  Settings, LogOut, UserCircle, Share2,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -22,7 +22,13 @@ import {
 import { Wallet, MapPin } from "lucide-react";
 
 export function AppSidebar() {
-  const { isOwner, activeTrip, setActiveTripId, createInvite } = useTrip();
+  let tripCtx: ReturnType<typeof useTrip> | null = null;
+  try { tripCtx = useTrip(); } catch {}
+  const activeTrip = tripCtx?.activeTrip ?? null;
+  const isOwner = tripCtx?.isOwner ?? false;
+  const setActiveTripId = tripCtx?.setActiveTripId ?? (() => {});
+  const createInvite = tripCtx?.createInvite ?? (async () => null);
+
   const navigate = useNavigate();
   const { setOpenMobile } = useSidebar();
 
@@ -47,21 +53,21 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border">
+    <Sidebar side="right" collapsible="offcanvas" className="border-l border-sidebar-border">
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
           <div className="flex items-center justify-center w-9 h-9 rounded-xl gradient-primary shrink-0">
-            <MapPin className="h-4 w-4 text-primary-foreground" />
+            {activeTrip ? <MapPin className="h-4 w-4 text-primary-foreground" /> : <Wallet className="h-4 w-4 text-primary-foreground" />}
           </div>
           <div className="min-w-0">
             <p className="font-display font-bold text-sm truncate">{activeTrip?.name || "TripFund"}</p>
-            <p className="text-xs text-sidebar-foreground/50">{activeTrip?.members.length || 0} members</p>
+            {activeTrip && <p className="text-xs text-sidebar-foreground/50">{activeTrip.members.length} members</p>}
           </div>
         </div>
       </SidebarHeader>
 
       <SidebarContent className="pt-2">
-        {isOwner && (
+        {activeTrip && isOwner && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-xs uppercase tracking-wider text-sidebar-foreground/50">
               Manage
@@ -119,17 +125,19 @@ export function AppSidebar() {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <button
-                onClick={handleLeaveTrip}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors w-full"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Leave Trip</span>
-              </button>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {activeTrip && (
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <button
+                  onClick={handleLeaveTrip}
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-sidebar-foreground/70 hover:bg-sidebar-accent transition-colors w-full"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Leave Trip</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
