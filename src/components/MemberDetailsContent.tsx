@@ -162,16 +162,27 @@ export function MemberDetailsContent({ trip, memberId, bottomNav, backTo = "/das
                                                         <ArrowUpCircle className="h-4 w-4 text-expense shrink-0" />
                                                     )}
                                                     <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium truncate">{t.note}</p>
+                                                        <p className="text-sm font-medium truncate">
+                                                            {t.type === 'deposit'
+                                                                ? (t.note || 'Deposit')
+                                                                : `${t.originTx?.category || ''}${t.originTx?.subcategory ? ` · ${t.originTx.subcategory}` : ''}`}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground truncate">
+                                                            {t.type === 'deposit'
+                                                                ? 'Deposit'
+                                                                : (t.originTx?.note || `Split: ${t.originTx?.splits?.length || 0} members`)}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right shrink-0">
+                                                        <span className={cn("font-display font-bold text-sm", t.type === 'deposit' ? "text-deposit" : "text-expense")}>
+                                                            {t.type === 'deposit' ? "+" : "-"}{t.amount.toFixed(2)}
+                                                        </span>
                                                         {t.type === 'expense_share' && t.originTx && t.originTx.amount && (
-                                                            <p className="text-xs text-muted-foreground truncate">
-                                                                of {trip.currency} {t.originTx.amount.toFixed(0)} total
+                                                            <p className="text-[10px] text-muted-foreground">
+                                                                of {trip.currency} {t.originTx.amount.toFixed(2)} total
                                                             </p>
                                                         )}
                                                     </div>
-                                                    <span className={cn("font-display font-bold text-sm shrink-0", t.type === 'deposit' ? "text-deposit" : "text-expense")}>
-                                                        {t.type === 'deposit' ? "+" : "-"}{t.amount.toFixed(2)}
-                                                    </span>
                                                 </div>
                                             </CardContent>
                                         </Card>
