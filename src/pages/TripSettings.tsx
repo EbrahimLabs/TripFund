@@ -14,7 +14,7 @@ import { FundManagerBadge } from "@/components/FundManagerBadge";
 export default function TripSettings() {
   const {
     activeTrip, editTripDetails, addMember, renameMember,
-    setFundManager, getMemberUserIds,
+    setFundManager, getMemberUserIds, loading,
   } = useTrip();
   const navigate = useNavigate();
   const [tripName, setTripName] = useState("");
@@ -24,12 +24,12 @@ export default function TripSettings() {
   const [memberUserIds, setMemberUserIds] = useState<Record<string, string | null>>({});
 
   useEffect(() => {
-    if (!activeTrip) navigate("/");
-    else {
+    if (!loading && !activeTrip) navigate("/");
+    else if (activeTrip) {
       setTripName(activeTrip.name);
       getMemberUserIds().then(setMemberUserIds);
     }
-  }, [activeTrip, navigate, getMemberUserIds]);
+  }, [activeTrip, loading, navigate, getMemberUserIds]);
 
   if (!activeTrip) return null;
 
@@ -82,11 +82,10 @@ export default function TripSettings() {
                 <button
                   type="button"
                   onClick={async () => await setFundManager(activeTrip.fundManagerId === m.id ? undefined : m.id)}
-                  className={`shrink-0 p-1.5 rounded-md transition-colors ${
-                    activeTrip.fundManagerId === m.id
+                  className={`shrink-0 p-1.5 rounded-md transition-colors ${activeTrip.fundManagerId === m.id
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground/40"
-                  }`}
+                    }`}
                 >
                   <Crown className="h-4 w-4" />
                 </button>

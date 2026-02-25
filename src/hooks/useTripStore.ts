@@ -63,7 +63,18 @@ export interface Trip {
 export function useTripStore() {
   const { user } = useAuthContext();
   const [trips, setTrips] = useState<Trip[]>([]);
-  const [activeTripId, setActiveTripId] = useState<string | null>(null);
+  const [activeTripId, _setActiveTripId] = useState<string | null>(
+    () => localStorage.getItem("activeTripId")
+  );
+
+  const setActiveTripId = useCallback((id: string | null) => {
+    _setActiveTripId(id);
+    if (id) {
+      localStorage.setItem("activeTripId", id);
+    } else {
+      localStorage.removeItem("activeTripId");
+    }
+  }, []);
   const [loading, setLoading] = useState(true);
 
   const activeTrip = trips.find((t) => t.id === activeTripId) || null;
@@ -313,25 +324,106 @@ export function useTripStore() {
   }, [activeTrip]);
 
   const getSettlements = useCallback((): Settlement[] => {
+    if (!activeTrip?.fundManagerId) return [];
     const balances = getMemberBalances();
-    const debtors = balances.filter((b) => b.net < 0).map((b) => ({ ...b }));
-    const creditors = balances.filter((b) => b.net > 0).map((b) => ({ ...b }));
-    debtors.sort((a, b) => a.net - b.net);
-    creditors.sort((a, b) => b.net - a.net);
     const settlements: Settlement[] = [];
-    let i = 0, j = 0;
-    while (i < debtors.length && j < creditors.length) {
-      const amount = Math.min(-debtors[i].net, creditors[j].net);
-      if (amount > 0.01) {
-        settlements.push({ fromId: debtors[i].member.id, toId: creditors[j].member.id, amount: Math.round(amount * 100) / 100, completed: false });
+
+    for (const b of balances) {
+      if (b.net < -0.01) {
+        if (b.member.id === activeTrip.fundManagerId) {
+          // Fund manager also owes the fund (self-settlement)
+          settlements.push({
+            fromId: b.member.id,
+            toId: b.member.id,
+            amount: Math.round(Math.abs(b.net) * 100) / 100,
+            completed: false,
+          });
+        } else {
+          // Member owes the fund manager
+          settlements.push({
+            fromId: b.member.id,
+            toId: activeTrip.fundManagerId,
+            amount: Math.round(Math.abs(b.net) * 100) / 100,
+            completed: false,
+          });
+        }
+      } else if (b.net > 0.01 && b.member.id !== activeTrip.fundManagerId) {
+        // Fund manager owes this member back
+        settlements.push({
+          fromId: activeTrip.fundManagerId,
+          toId: b.member.id,
+          amount: Math.round(b.net * 100) / 100,
+          completed: false,
+        });
       }
-      debtors[i].net += amount;
-      creditors[j].net -= amount;
-      if (Math.abs(debtors[i].net) < 0.01) i++;
-      if (Math.abs(creditors[j].net) < 0.01) j++;
     }
+
     return settlements;
-  }, [getMemberBalances]);
+  }, [activeTrip, getMemberBalances]);
+
+  const SETTLEMENT_TX_KEY = "tripfund_settlement_txns";
+
+  const getSettlementTxMap = useCallback((): Record<string, string> => {
+    if (!activeTripId) return {};
+    try {
+      const data = localStorage.getItem(SETTLEMENT_TX_KEY);
+      const all = data ? JSON.parse(data) : {};
+      return all[activeTripId] || {};
+    } catch { return {}; }
+  }, [activeTripId]);
+
+  const saveSettlementTxMap = useCallback((map: Record<string, string>) => {
+    if (!activeTripId) return;
+    try {
+      const data = localStorage.getItem(SETTLEMENT_TX_KEY);
+      const all = data ? JSON.parse(data) : {};
+      all[activeTripId] = map;
+      localStorage.setItem(SETTLEMENT_TX_KEY, JSON.stringify(all));
+    } catch { }
+  }, [activeTripId]);
+
+  const markSettlementPaid = useCallback(async (fromId: string, toId: string, amount: number) => {
+    if (!activeTripId) return;
+    const key = `${fromId}_${toId}`;
+
+    // Create a deposit for the member who owes
+    const { data: inserted, error } = await supabase
+      .from("transactions")
+      .insert({
+        trip_id: activeTripId,
+        type: "deposit",
+        amount,
+        date: new Date().toISOString().split("T")[0],
+        note: "[Settlement]",
+        member_id: fromId,
+      })
+      .select()
+      .single();
+
+    if (error || !inserted) { if (import.meta.env.DEV) console.error(error); return; }
+
+    // Track the transaction ID so we can delete it if unmarked
+    const map = getSettlementTxMap();
+    map[key] = inserted.id;
+    saveSettlementTxMap(map);
+
+    await loadTrips();
+  }, [activeTripId, getSettlementTxMap, saveSettlementTxMap, loadTrips]);
+
+  const unmarkSettlementPaid = useCallback(async (fromId: string, toId: string) => {
+    if (!activeTripId) return;
+    const key = `${fromId}_${toId}`;
+    const map = getSettlementTxMap();
+    const txId = map[key];
+
+    if (txId) {
+      await supabase.from("transactions").delete().eq("id", txId);
+      delete map[key];
+      saveSettlementTxMap(map);
+    }
+
+    await loadTrips();
+  }, [activeTripId, getSettlementTxMap, saveSettlementTxMap, loadTrips]);
 
   const getMemberName = useCallback((id: string) => {
     return activeTrip?.members.find((m) => m.id === id)?.name || "Unknown";
@@ -386,5 +478,8 @@ export function useTripStore() {
     refreshTrips: loadTrips,
     createInvite,
     getMemberUserIds,
+    markSettlementPaid,
+    unmarkSettlementPaid,
+    getSettlementTxMap,
   };
 }

@@ -20,13 +20,13 @@ const CHART_COLORS = [
 export default function TripDashboard() {
   const {
     activeTrip, getStats, getMemberBalances,
-    getDailyExpenses, getCategoryBreakdown,
+    getDailyExpenses, getCategoryBreakdown, loading,
   } = useTrip();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!activeTrip) navigate("/");
-  }, [activeTrip, navigate]);
+    if (!loading && !activeTrip) navigate("/");
+  }, [activeTrip, loading, navigate]);
 
   if (!activeTrip) return null;
 

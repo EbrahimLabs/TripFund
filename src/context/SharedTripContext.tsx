@@ -82,25 +82,42 @@ export function SharedTripProvider({ children }: { children: React.ReactNode }) 
   }, [trip]);
 
   const getSettlements = useCallback((): Settlement[] => {
+    if (!trip?.fundManagerId) return [];
     const balances = getMemberBalances();
-    const debtors = balances.filter((b) => b.net < 0).map((b) => ({ ...b }));
-    const creditors = balances.filter((b) => b.net > 0).map((b) => ({ ...b }));
-    debtors.sort((a, b) => a.net - b.net);
-    creditors.sort((a, b) => b.net - a.net);
     const settlements: Settlement[] = [];
-    let i = 0, j = 0;
-    while (i < debtors.length && j < creditors.length) {
-      const amount = Math.min(-debtors[i].net, creditors[j].net);
-      if (amount > 0.01) {
-        settlements.push({ fromId: debtors[i].member.id, toId: creditors[j].member.id, amount: Math.round(amount * 100) / 100, completed: false });
+
+    for (const b of balances) {
+      if (b.net < -0.01) {
+        if (b.member.id === trip.fundManagerId) {
+          // Fund manager also owes the fund (self-settlement)
+          settlements.push({
+            fromId: b.member.id,
+            toId: b.member.id,
+            amount: Math.round(Math.abs(b.net) * 100) / 100,
+            completed: false,
+          });
+        } else {
+          // Member owes the fund manager
+          settlements.push({
+            fromId: b.member.id,
+            toId: trip.fundManagerId,
+            amount: Math.round(Math.abs(b.net) * 100) / 100,
+            completed: false,
+          });
+        }
+      } else if (b.net > 0.01 && b.member.id !== trip.fundManagerId) {
+        // Fund manager owes this member back
+        settlements.push({
+          fromId: trip.fundManagerId,
+          toId: b.member.id,
+          amount: Math.round(b.net * 100) / 100,
+          completed: false,
+        });
       }
-      debtors[i].net += amount;
-      creditors[j].net -= amount;
-      if (Math.abs(debtors[i].net) < 0.01) i++;
-      if (Math.abs(creditors[j].net) < 0.01) j++;
     }
+
     return settlements;
-  }, [getMemberBalances]);
+  }, [trip, getMemberBalances]);
 
   const getMemberName = useCallback((id: string) => {
     return trip?.members.find((m) => m.id === id)?.name || "Unknown";

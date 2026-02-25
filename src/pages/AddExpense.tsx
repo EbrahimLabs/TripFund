@@ -17,7 +17,7 @@ import { FundManagerBadge } from "@/components/FundManagerBadge";
 type SplitMode = "equal" | "unequal" | "percentage";
 
 export default function AddExpense() {
-  const { activeTrip, addTransaction } = useTrip();
+  const { activeTrip, addTransaction, loading } = useTrip();
   const navigate = useNavigate();
   const { getCategoryNames, getSubcategories, addCategory, addSubcategory } = useCategoryManager();
 
@@ -39,9 +39,9 @@ export default function AddExpense() {
   const [newSubcategory, setNewSubcategory] = useState("");
 
   useEffect(() => {
-    if (!activeTrip) navigate("/");
-    else setSelectedMembers(activeTrip.members.map((m) => m.id));
-  }, [activeTrip, navigate]);
+    if (!loading && !activeTrip) navigate("/");
+    else if (activeTrip) setSelectedMembers(activeTrip.members.map((m) => m.id));
+  }, [activeTrip, loading, navigate]);
 
   useEffect(() => {
     setSubcategory(getSubcategories(category)[0] || "");
@@ -168,134 +168,134 @@ export default function AddExpense() {
 
   return (
     <>
-    <PageShell title="Add Expense" backTo="/dashboard">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Amount */}
-        <div className="space-y-2">
-          <Label htmlFor="expAmount">Amount (BDT)</Label>
-          <Input id="expAmount" type="number" inputMode="decimal" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} min="0" step="0.01" autoFocus className="text-2xl font-display font-bold h-14 glass" />
-        </div>
-
-        {/* Category */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label>Category</Label>
-            <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2 gap-1" onClick={() => setShowAddCat((v) => !v)}><Plus className="h-3 w-3" /> Add</Button>
+      <PageShell title="Add Expense" backTo="/dashboard">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Amount */}
+          <div className="space-y-2">
+            <Label htmlFor="expAmount">Amount (BDT)</Label>
+            <Input id="expAmount" type="number" inputMode="decimal" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} min="0" step="0.01" autoFocus className="text-2xl font-display font-bold h-14 glass" />
           </div>
-          <AnimatePresence>
-            {showAddCat && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden">
-                <Input placeholder="New category..." value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="h-8 text-xs glass" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCategory(); } }} />
-                <Button type="button" size="sm" className="h-8 text-xs gradient-primary border-0" onClick={handleAddCategory}>Add</Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <div className="flex flex-wrap gap-1.5">
-            {categoryNames.map((cat) => (
-              <Button key={cat} type="button" variant={category === cat ? "default" : "outline"} size="sm" onClick={() => setCategory(cat)} className={`text-xs transition-all ${category === cat ? "gradient-primary glow-sm border-0" : "glass"}`}>{cat}</Button>
-            ))}
-          </div>
-        </div>
 
-        {/* Subcategory */}
-        <AnimatePresence mode="wait">
-          <motion.div key={category} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2 overflow-hidden">
+          {/* Category */}
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Subcategory</Label>
-              <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2 gap-1" onClick={() => setShowAddSub((v) => !v)}><Plus className="h-3 w-3" /> Add</Button>
+              <Label>Category</Label>
+              <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2 gap-1" onClick={() => setShowAddCat((v) => !v)}><Plus className="h-3 w-3" /> Add</Button>
             </div>
             <AnimatePresence>
-              {showAddSub && (
+              {showAddCat && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden">
-                  <Input placeholder="New subcategory..." value={newSubcategory} onChange={(e) => setNewSubcategory(e.target.value)} className="h-8 text-xs glass" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSubcategory(); } }} />
-                  <Button type="button" size="sm" className="h-8 text-xs gradient-primary border-0" onClick={handleAddSubcategory}>Add</Button>
+                  <Input placeholder="New category..." value={newCategory} onChange={(e) => setNewCategory(e.target.value)} className="h-8 text-xs glass" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddCategory(); } }} />
+                  <Button type="button" size="sm" className="h-8 text-xs gradient-primary border-0" onClick={handleAddCategory}>Add</Button>
                 </motion.div>
               )}
             </AnimatePresence>
             <div className="flex flex-wrap gap-1.5">
-              {getSubcategories(category).map((sub) => (
-                <Button key={sub} type="button" variant={subcategory === sub ? "secondary" : "ghost"} size="sm" onClick={() => setSubcategory(sub)} className="text-xs h-7 px-2.5">{sub}</Button>
+              {categoryNames.map((cat) => (
+                <Button key={cat} type="button" variant={category === cat ? "default" : "outline"} size="sm" onClick={() => setCategory(cat)} className={`text-xs transition-all ${category === cat ? "gradient-primary glow-sm border-0" : "glass"}`}>{cat}</Button>
               ))}
             </div>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Split Mode */}
-        <div className="space-y-2">
-          <Label>Split Mode</Label>
-          <div className="flex gap-1.5 p-1 glass rounded-xl">
-            {(["equal", "unequal", "percentage"] as const).map((mode) => (
-              <Button key={mode} type="button" variant={splitMode === mode ? "default" : "ghost"} size="sm" className={`flex-1 text-xs capitalize h-7 ${splitMode === mode ? "gradient-primary border-0" : ""}`} onClick={() => setSplitMode(mode)}>
-                {mode === "percentage" ? "%" : mode}
-              </Button>
-            ))}
           </div>
-        </div>
 
-        {/* Split among */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label>Split among</Label>
-            <div className="flex gap-2">
-              <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setSelectedMembers(activeTrip.members.map((m) => m.id))}>Select all</Button>
-              <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setSelectedMembers([])}>Clear</Button>
+          {/* Subcategory */}
+          <AnimatePresence mode="wait">
+            <motion.div key={category} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2 overflow-hidden">
+              <div className="flex items-center justify-between">
+                <Label>Subcategory</Label>
+                <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2 gap-1" onClick={() => setShowAddSub((v) => !v)}><Plus className="h-3 w-3" /> Add</Button>
+              </div>
+              <AnimatePresence>
+                {showAddSub && (
+                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden">
+                    <Input placeholder="New subcategory..." value={newSubcategory} onChange={(e) => setNewSubcategory(e.target.value)} className="h-8 text-xs glass" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSubcategory(); } }} />
+                    <Button type="button" size="sm" className="h-8 text-xs gradient-primary border-0" onClick={handleAddSubcategory}>Add</Button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <div className="flex flex-wrap gap-1.5">
+                {getSubcategories(category).map((sub) => (
+                  <Button key={sub} type="button" variant={subcategory === sub ? "secondary" : "ghost"} size="sm" onClick={() => setSubcategory(sub)} className="text-xs h-7 px-2.5">{sub}</Button>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Split Mode */}
+          <div className="space-y-2">
+            <Label>Split Mode</Label>
+            <div className="flex gap-1.5 p-1 glass rounded-xl">
+              {(["equal", "unequal", "percentage"] as const).map((mode) => (
+                <Button key={mode} type="button" variant={splitMode === mode ? "default" : "ghost"} size="sm" className={`flex-1 text-xs capitalize h-7 ${splitMode === mode ? "gradient-primary border-0" : ""}`} onClick={() => setSplitMode(mode)}>
+                  {mode === "percentage" ? "%" : mode}
+                </Button>
+              ))}
             </div>
           </div>
-          <div className="space-y-1.5">
-            {[...activeTrip.members].sort((a, b) => (activeTrip.fundManagerId === a.id ? -1 : activeTrip.fundManagerId === b.id ? 1 : 0)).map((m) => {
-              const isSelected = selectedMembers.includes(m.id);
-              return (
-                <label key={m.id} className="flex items-center gap-3 rounded-xl glass p-3 cursor-pointer transition-all">
-                  <Checkbox checked={isSelected} onCheckedChange={() => toggleMember(m.id)} />
-                  <span className="text-sm font-medium flex-1 flex items-center gap-1.5">
-                    {m.name}
-                    {activeTrip.fundManagerId === m.id && <FundManagerBadge />}
-                  </span>
-                  {isSelected && splitMode === "unequal" && (
-                    <Input type="number" inputMode="decimal" placeholder="0" value={customAmounts[m.id] || ""} onChange={(e) => setCustomAmounts((prev) => ({ ...prev, [m.id]: e.target.value }))} className="h-7 w-20 text-xs text-right glass" onClick={(e) => e.stopPropagation()} />
-                  )}
-                  {isSelected && splitMode === "percentage" && (
-                    <div className="flex items-center gap-1">
-                      <Input type="number" inputMode="decimal" placeholder="0" value={percentages[m.id] || ""} onChange={(e) => setPercentages((prev) => ({ ...prev, [m.id]: e.target.value }))} className="h-7 w-16 text-xs text-right glass" onClick={(e) => e.stopPropagation()} />
-                      <span className="text-xs text-muted-foreground">%</span>
-                    </div>
-                  )}
-                  {isSelected && amt > 0 && (
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">৳{getShareDisplay(m.id)}</span>
-                  )}
-                </label>
-              );
-            })}
+
+          {/* Split among */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Split among</Label>
+              <div className="flex gap-2">
+                <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setSelectedMembers(activeTrip.members.map((m) => m.id))}>Select all</Button>
+                <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2" onClick={() => setSelectedMembers([])}>Clear</Button>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              {[...activeTrip.members].sort((a, b) => (activeTrip.fundManagerId === a.id ? -1 : activeTrip.fundManagerId === b.id ? 1 : 0)).map((m) => {
+                const isSelected = selectedMembers.includes(m.id);
+                return (
+                  <label key={m.id} className="flex items-center gap-3 rounded-xl glass p-3 cursor-pointer transition-all">
+                    <Checkbox checked={isSelected} onCheckedChange={() => toggleMember(m.id)} />
+                    <span className="text-sm font-medium flex-1 flex items-center gap-1.5">
+                      {m.name}
+                      {activeTrip.fundManagerId === m.id && <FundManagerBadge />}
+                    </span>
+                    {isSelected && splitMode === "unequal" && (
+                      <Input type="number" inputMode="decimal" placeholder="0" value={customAmounts[m.id] || ""} onChange={(e) => setCustomAmounts((prev) => ({ ...prev, [m.id]: e.target.value }))} className="h-7 w-20 text-xs text-right glass" onClick={(e) => e.stopPropagation()} />
+                    )}
+                    {isSelected && splitMode === "percentage" && (
+                      <div className="flex items-center gap-1">
+                        <Input type="number" inputMode="decimal" placeholder="0" value={percentages[m.id] || ""} onChange={(e) => setPercentages((prev) => ({ ...prev, [m.id]: e.target.value }))} className="h-7 w-16 text-xs text-right glass" onClick={(e) => e.stopPropagation()} />
+                        <span className="text-xs text-muted-foreground">%</span>
+                      </div>
+                    )}
+                    {isSelected && amt > 0 && (
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">৳{getShareDisplay(m.id)}</span>
+                    )}
+                  </label>
+                );
+              })}
+            </div>
+            {splitMode === "unequal" && amt > 0 && selectedMembers.length > 0 && (
+              <p className={`text-xs ${Math.abs(getUnequalTotal() - amt) > 0.01 ? "text-destructive" : "text-muted-foreground"}`}>
+                Total: ৳{getUnequalTotal().toFixed(2)} / ৳{amt.toFixed(2)}
+                {Math.abs(getUnequalTotal() - amt) > 0.01 && ` (${getUnequalTotal() > amt ? "+" : ""}${(getUnequalTotal() - amt).toFixed(2)} off)`}
+              </p>
+            )}
+            {splitMode === "percentage" && selectedMembers.length > 0 && (
+              <p className={`text-xs ${Math.abs(getPercentageTotal() - 100) > 0.5 ? "text-destructive" : "text-muted-foreground"}`}>
+                Total: {getPercentageTotal().toFixed(1)}% / 100%
+              </p>
+            )}
           </div>
-          {splitMode === "unequal" && amt > 0 && selectedMembers.length > 0 && (
-            <p className={`text-xs ${Math.abs(getUnequalTotal() - amt) > 0.01 ? "text-destructive" : "text-muted-foreground"}`}>
-              Total: ৳{getUnequalTotal().toFixed(2)} / ৳{amt.toFixed(2)}
-              {Math.abs(getUnequalTotal() - amt) > 0.01 && ` (${getUnequalTotal() > amt ? "+" : ""}${(getUnequalTotal() - amt).toFixed(2)} off)`}
-            </p>
-          )}
-          {splitMode === "percentage" && selectedMembers.length > 0 && (
-            <p className={`text-xs ${Math.abs(getPercentageTotal() - 100) > 0.5 ? "text-destructive" : "text-muted-foreground"}`}>
-              Total: {getPercentageTotal().toFixed(1)}% / 100%
-            </p>
-          )}
-        </div>
 
-        {/* Date */}
-        <div className="space-y-2">
-          <Label htmlFor="expDate">Date</Label>
-          <Input id="expDate" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="glass" />
-        </div>
+          {/* Date */}
+          <div className="space-y-2">
+            <Label htmlFor="expDate">Date</Label>
+            <Input id="expDate" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="glass" />
+          </div>
 
-        {/* Note */}
-        <div className="space-y-2">
-          <Label htmlFor="expNote">Note (optional)</Label>
-          <Textarea id="expNote" placeholder="e.g., Dinner at the beach" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="glass" />
-        </div>
+          {/* Note */}
+          <div className="space-y-2">
+            <Label htmlFor="expNote">Note (optional)</Label>
+            <Textarea id="expNote" placeholder="e.g., Dinner at the beach" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="glass" />
+          </div>
 
-        <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0}>Add Expense</Button>
-      </form>
-    </PageShell>
-    <BottomNav />
+          <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0}>Add Expense</Button>
+        </form>
+      </PageShell>
+      <BottomNav />
     </>
   );
 }

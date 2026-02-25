@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowDownCircle, ArrowUpCircle, UserCircle, Wallet, Calendar, Plus, Minus } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, UserCircle, Wallet, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import type { Trip } from "@/hooks/useTripStore";
@@ -11,9 +11,10 @@ interface MemberDetailsContentProps {
     trip: Trip;
     memberId: string;
     bottomNav?: React.ReactNode;
+    backTo?: string;
 }
 
-export function MemberDetailsContent({ trip, memberId, bottomNav }: MemberDetailsContentProps) {
+export function MemberDetailsContent({ trip, memberId, bottomNav, backTo = "/dashboard" }: MemberDetailsContentProps) {
     const member = trip.members.find(m => m.id === memberId);
     const isFundManager = trip.fundManagerId === memberId;
 
@@ -77,7 +78,7 @@ export function MemberDetailsContent({ trip, memberId, bottomNav }: MemberDetail
 
     return (
         <>
-            <PageShell title={member.name} icon={UserCircle} backTo=".." className="!pb-0">
+            <PageShell title={member.name} icon={UserCircle} backTo={backTo} className="!pb-0">
                 {/* Balance Card */}
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
                     <Card className="gradient-card glow-primary border-0 overflow-hidden relative">
@@ -152,32 +153,34 @@ export function MemberDetailsContent({ trip, memberId, bottomNav }: MemberDetail
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.05 }}
                                     >
-                                        <Card className="glass card-elevated border-0 overflow-hidden group hover:bg-white/[0.02] transition-colors">
-                                            <CardContent className="p-4">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={cn(
-                                                        "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm",
-                                                        t.type === 'deposit'
-                                                            ? "bg-deposit/10 text-deposit"
-                                                            : "bg-expense/10 text-expense"
-                                                    )}>
-                                                        {t.type === 'deposit' ? <Plus className="h-5 w-5" /> : <Minus className="h-5 w-5" />}
-                                                    </div>
-
+                                        <Card className="glass card-elevated border-0">
+                                            <CardContent className="p-3">
+                                                <div className="flex items-center gap-3">
+                                                    {t.type === 'deposit' ? (
+                                                        <ArrowDownCircle className="h-4 w-4 text-deposit shrink-0" />
+                                                    ) : (
+                                                        <ArrowUpCircle className="h-4 w-4 text-expense shrink-0" />
+                                                    )}
                                                     <div className="flex-1 min-w-0">
-                                                        <div className="flex items-start justify-between gap-2 mb-1">
-                                                            <p className="font-semibold text-sm truncate">{t.note}</p>
-                                                            <p className={cn(
-                                                                "font-display font-bold whitespace-nowrap",
-                                                                t.type === 'deposit' ? "text-deposit" : "text-expense"
-                                                            )}>
-                                                                {t.type === 'deposit' ? "+" : "-"}{trip.currency} {t.amount.toFixed(2)}
-                                                            </p>
-                                                        </div>
+                                                        <p className="text-sm font-medium truncate">
+                                                            {t.type === 'deposit'
+                                                                ? (t.note || 'Deposit')
+                                                                : `${t.originTx?.category || ''}${t.originTx?.subcategory ? ` · ${t.originTx.subcategory}` : ''}`}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground truncate">
+                                                            {t.type === 'deposit'
+                                                                ? 'Deposit'
+                                                                : (t.originTx?.note || `Split: ${t.originTx?.splits?.length || 0} members`)}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right shrink-0">
+                                                        <span className={cn("font-display font-bold text-sm", t.type === 'deposit' ? "text-deposit" : "text-expense")}>
+                                                            {t.type === 'deposit' ? "+" : "-"}{t.amount.toFixed(2)}
+                                                        </span>
                                                         {t.type === 'expense_share' && t.originTx && t.originTx.amount && (
-                                                            <div className="flex justify-end text-xs text-muted-foreground">
-                                                                <p>of {trip.currency} {t.originTx.amount.toFixed(0)} total</p>
-                                                            </div>
+                                                            <p className="text-[10px] text-muted-foreground">
+                                                                of {trip.currency} {t.originTx.amount.toFixed(2)} total
+                                                            </p>
                                                         )}
                                                     </div>
                                                 </div>
