@@ -80,7 +80,7 @@ export function CategoryManager() {
 
       <div className="space-y-1.5 max-h-[40vh] overflow-y-auto">
         {categories.map((cat, catIdx) => (
-          <div key={cat.name} className="rounded-lg border bg-background overflow-hidden">
+          <div key={cat.name} className="rounded-lg border bg-card overflow-hidden">
             {/* Category header */}
             <div className="flex items-center gap-1.5 px-2 py-2">
               <div className="flex flex-col">
