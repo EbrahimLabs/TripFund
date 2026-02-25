@@ -3,7 +3,7 @@ CREATE TABLE public.trip_invites (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   trip_id uuid REFERENCES public.trips(id) ON DELETE CASCADE NOT NULL,
   member_id uuid REFERENCES public.trip_members(id) ON DELETE CASCADE NOT NULL,
-  token text UNIQUE NOT NULL DEFAULT encode(gen_random_bytes(16), 'hex'),
+  token text UNIQUE NOT NULL DEFAULT gen_random_uuid()::text,
   accepted_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
   expires_at timestamptz NOT NULL DEFAULT (now() + interval '7 days'),
   created_at timestamptz NOT NULL DEFAULT now()

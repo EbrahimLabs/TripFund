@@ -1,4 +1,7 @@
-project_id = "ozzipxfqdgjzolyqnbmd"
+project_id = "wzuztomgmrusfdjoteit"
 
 [functions.delete-account]
+verify_jwt = false
+
+[functions.get-trip-by-invite]
 verify_jwt = false
