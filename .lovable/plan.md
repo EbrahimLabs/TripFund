@@ -1,100 +1,76 @@
 
 
-## Account Management & Member Invite System
+## Admin vs Member Portal
 
-### Current State
-- Auth exists: email/password + Google OAuth sign-in
-- `profiles` table has: `id`, `display_name`, `avatar_url`, `created_at`, `updated_at`
-- `trip_members` has a nullable `user_id` column (linking members to accounts)
-- No account management page exists
-- No invite system exists
+### Current Problem
+Right now, when an invited member accepts a link and logs in, they see the exact same UI as the trip owner -- including the ability to add deposits, expenses, edit transactions, and manage trip settings. There is no role distinction in the UI.
 
-### Plan
+### How It Will Work
 
-#### 1. Account/Profile Page (`src/pages/AccountPage.tsx`)
-A new page accessible from the home screen header, containing:
-- **Display name**: editable field, saves to `profiles.display_name`
-- **Email**: shown read-only from `user.email`
-- **Change password**: form with current password not required (uses `supabase.auth.updateUser`)
-- **Sign out**: button
-- **Delete account**: confirmation dialog, then calls a backend function to delete the user and cascade data
+**Role detection** -- no new database tables needed. The existing data already tells us everything:
 
-Route: `/account` (protected)
+- **Admin (Trip Owner)**: `trips.owner_id === auth.uid()` -- full access to everything
+- **Member**: `trip_members.user_id === auth.uid()` AND NOT the owner -- read-only view
 
-#### 2. Delete Account Backend Function
-A backend function (`delete-account`) that:
-- Verifies the authenticated user
-- Deletes the user from `auth.users` (cascades to profiles, trip_members via FK)
-- Uses the service role key to perform admin-level deletion
+**What members CAN see:**
+- Dashboard with balances, charts, category breakdown
+- Settlement page (view who owes whom)
+- Summary page (view all transactions, search/filter -- but NOT edit or delete)
 
-#### 3. Invite Members via Link
-**How it works:**
-1. Trip owner taps "Invite" on a trip member in settings
-2. System generates a unique invite token stored in a new `trip_invites` table
-3. A shareable link is generated (e.g., `https://tripfund.lovable.app/invite/{token}`)
-4. When someone opens the link:
-   - If not logged in: redirected to auth page, then back to invite
-   - If logged in: shown the trip name and a "Join" button
-   - On join: their `user_id` is linked to the matching `trip_member` row
+**What members CANNOT do:**
+- Add deposits (Deposit tab hidden from bottom nav)
+- Add expenses (Expense tab hidden from bottom nav)
+- Edit or delete transactions on Summary page
+- Access Trip Settings (settings gear hidden)
+- Delete the trip
+- Manage members or send invites
 
-**Database migration:**
-```sql
-CREATE TABLE public.trip_invites (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  trip_id uuid REFERENCES public.trips(id) ON DELETE CASCADE NOT NULL,
-  member_id uuid REFERENCES public.trip_members(id) ON DELETE CASCADE NOT NULL,
-  token text UNIQUE NOT NULL DEFAULT encode(gen_random_bytes(16), 'hex'),
-  accepted_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
-  expires_at timestamptz NOT NULL DEFAULT (now() + interval '7 days'),
-  created_at timestamptz NOT NULL DEFAULT now()
-);
+**What members CAN still do:**
+- View their own balance and the overall trip status
+- Browse settlements and summary
+- Access their own account page (profile, password, sign out)
 
-ALTER TABLE public.trip_invites ENABLE ROW LEVEL SECURITY;
+### Implementation Details
 
--- Trip owners can create invites
-CREATE POLICY "Trip owners can manage invites"
-  ON public.trip_invites FOR ALL TO authenticated
-  USING (trip_id IN (SELECT id FROM public.trips WHERE owner_id = auth.uid()));
-
--- Anyone authenticated can read invites by token (to accept)
-CREATE POLICY "Authenticated users can view invites by token"
-  ON public.trip_invites FOR SELECT TO authenticated
-  USING (true);
+#### 1. Add `isOwner` flag to the trip store
+In `useTripStore.ts`, expose a computed boolean:
 ```
+isOwner = activeTrip?.owner_id === user?.id
+```
+This is already available since `Trip` has `owner_id` and `useAuth` has `user.id`.
 
-#### 4. Invite Page (`src/pages/InvitePage.tsx`)
-- Route: `/invite/:token`
-- Fetches invite details (trip name, member name)
-- If expired or already accepted: shows error
-- Otherwise: "Join as {member_name}" button
-- On accept: updates `trip_members.user_id` and `trip_invites.accepted_by`
+#### 2. Expose `isOwner` through context
+`TripContext` already passes through the full store return. Just add `isOwner` to the return of `useTripStore`.
 
-#### 5. UI Changes
+#### 3. Conditional bottom navigation
+`BottomNav.tsx` will filter out `/deposit` and `/expense` tabs when the user is not the owner. Members see 3 tabs: Dashboard, Settle, Summary.
 
-**Home page header** (`src/pages/Index.tsx`):
-- Add a user avatar/icon button that navigates to `/account`
+#### 4. Conditional dashboard UI
+`TripDashboard.tsx`:
+- Hide the Settings gear button for non-owners
+- Hide the "Leave trip" / logout button behavior stays the same (navigates to home)
 
-**Trip Settings members tab** (`src/pages/TripDashboard.tsx`):
-- Add "Invite" button next to each unlinked member (no `user_id`)
-- Shows a share sheet with the invite link (using `navigator.share` or copy-to-clipboard)
-- Members already linked show a "Linked" badge
+#### 5. Read-only Summary page
+`SummaryPage.tsx`:
+- Hide Edit (pencil) and Delete (trash) buttons on each transaction for non-owners
+- Hide the Share button stays visible for everyone
 
-**App router** (`src/App.tsx`):
-- Add `/account` route (protected)
-- Add `/invite/:token` route (protected, inside `AuthProvider` but outside `TripProvider`)
+#### 6. Route guards
+`App.tsx`:
+- `/deposit` and `/expense` routes redirect non-owners to `/dashboard`
 
-### Technical Details
+#### 7. Member home page experience
+When a linked member logs in and goes to `/` (Index page):
+- They see trips where they are a member (already works via RLS `is_trip_member`)
+- They cannot create new trips (hide "New Trip" button for trips they don't own -- actually, members should still be able to create their OWN trips, so "New Trip" stays)
+- The trip card click works the same way
 
-**Files to create:**
-- `src/pages/AccountPage.tsx` - profile management UI
-- `src/pages/InvitePage.tsx` - invite acceptance page
-- `supabase/functions/delete-account/index.ts` - account deletion edge function
-- Database migration for `trip_invites` table
+#### Files to modify:
+- `src/hooks/useTripStore.ts` -- add `isOwner` computed property
+- `src/components/BottomNav.tsx` -- conditionally show/hide Deposit & Expense tabs
+- `src/pages/TripDashboard.tsx` -- hide Settings for non-owners
+- `src/pages/SummaryPage.tsx` -- hide edit/delete for non-owners
+- `src/App.tsx` -- add route guard for `/deposit` and `/expense`
 
-**Files to modify:**
-- `src/App.tsx` - add routes
-- `src/pages/Index.tsx` - add account button in header
-- `src/pages/TripDashboard.tsx` - add invite buttons in member settings
-- `src/hooks/useAuth.ts` - add `deleteAccount` method
-- `src/hooks/useTripStore.ts` - add `createInvite` and `acceptInvite` methods
+No database changes needed. No new pages needed. The invite system already handles the "single entry point" for members.
 
