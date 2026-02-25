@@ -29,7 +29,7 @@ export default function TripDashboard() {
     activeTrip, getStats, getMemberBalances, setActiveTripId,
     getDailyExpenses, getCategoryBreakdown,
     editTripDetails, addMember, renameMember, setFundManager,
-    createInvite, getMemberUserIds,
+    createInvite, getMemberUserIds, isOwner,
   } = useTrip();
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
@@ -98,99 +98,101 @@ export default function TripDashboard() {
         icon={MapPin}
         action={
           <div className="flex gap-1">
-            <Sheet open={showSettings} onOpenChange={setShowSettings}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-muted-foreground">
-                  <Settings className="h-[18px] w-[18px]" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="overflow-y-auto glass">
-                <SheetHeader>
-                  <SheetTitle>Trip Settings</SheetTitle>
-                </SheetHeader>
-                <Tabs defaultValue="general" className="mt-4">
-                  <TabsList className="w-full glass">
-                    <TabsTrigger value="general" className="flex-1 text-xs">General</TabsTrigger>
-                    <TabsTrigger value="members" className="flex-1 text-xs">Members</TabsTrigger>
-                    <TabsTrigger value="categories" className="flex-1 text-xs">Categories</TabsTrigger>
-                  </TabsList>
+            {isOwner && (
+              <Sheet open={showSettings} onOpenChange={setShowSettings}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-muted-foreground">
+                    <Settings className="h-[18px] w-[18px]" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="overflow-y-auto glass">
+                  <SheetHeader>
+                    <SheetTitle>Trip Settings</SheetTitle>
+                  </SheetHeader>
+                  <Tabs defaultValue="general" className="mt-4">
+                    <TabsList className="w-full glass">
+                      <TabsTrigger value="general" className="flex-1 text-xs">General</TabsTrigger>
+                      <TabsTrigger value="members" className="flex-1 text-xs">Members</TabsTrigger>
+                      <TabsTrigger value="categories" className="flex-1 text-xs">Categories</TabsTrigger>
+                    </TabsList>
 
-                  <TabsContent value="general" className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label>Trip Name</Label>
-                      <Input value={tripName} onChange={(e) => setTripName(e.target.value)} />
-                    </div>
-                    <Button onClick={handleSaveSettings} className="w-full gradient-primary border-0">Save Changes</Button>
-                  </TabsContent>
-
-                  <TabsContent value="members" className="space-y-3 mt-4">
-                    <p className="text-xs text-muted-foreground">Tap the crown to set as Fund Manager</p>
-                    {[...activeTrip.members].sort((a, b) => (activeTrip.fundManagerId === a.id ? -1 : activeTrip.fundManagerId === b.id ? 1 : 0)).map((m) => (
-                      <div key={m.id} className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={async () => await setFundManager(activeTrip.fundManagerId === m.id ? undefined : m.id)}
-                          className={`shrink-0 p-1.5 rounded-md transition-colors ${
-                            activeTrip.fundManagerId === m.id
-                              ? "text-primary bg-primary/10"
-                              : "text-muted-foreground/40"
-                          }`}
-                        >
-                          <Crown className="h-4 w-4" />
-                        </button>
-                        {editingMemberId === m.id ? (
-                          <>
-                            <Input
-                              value={editMemberName}
-                              onChange={(e) => setEditMemberName(e.target.value)}
-                              className="flex-1 h-8 text-sm"
-                              autoFocus
-                              onKeyDown={(e) => e.key === "Enter" && handleRenameMember(m.id)}
-                            />
-                            <Button size="sm" className="h-8 gradient-primary border-0" onClick={() => handleRenameMember(m.id)}>Save</Button>
-                          </>
-                        ) : (
-                          <>
-                            <span className="flex-1 text-sm flex items-center gap-1.5">
-                              {m.name}
-                              {activeTrip.fundManagerId === m.id && <FundManagerBadge />}
-                            </span>
-                            {memberUserIds[m.id] ? (
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <UserCheck className="h-3 w-3" /> Linked
-                              </span>
-                            ) : (
-                              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => handleInvite(m.id)}>
-                                <Link2 className="h-3 w-3 mr-1" /> Invite
-                              </Button>
-                            )}
-                            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setEditingMemberId(m.id); setEditMemberName(m.name); }}>
-                              Rename
-                            </Button>
-                          </>
-                        )}
+                    <TabsContent value="general" className="space-y-4 mt-4">
+                      <div className="space-y-2">
+                        <Label>Trip Name</Label>
+                        <Input value={tripName} onChange={(e) => setTripName(e.target.value)} />
                       </div>
-                    ))}
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="New member name"
-                        value={newMemberName}
-                        onChange={(e) => setNewMemberName(e.target.value)}
-                        className="flex-1 h-8 text-sm"
-                        onKeyDown={(e) => e.key === "Enter" && handleAddMember()}
-                      />
-                      <Button size="sm" className="h-8" variant="outline" onClick={handleAddMember}>
-                        <Plus className="h-3 w-3 mr-1" /> Add
-                      </Button>
-                    </div>
-                  </TabsContent>
+                      <Button onClick={handleSaveSettings} className="w-full gradient-primary border-0">Save Changes</Button>
+                    </TabsContent>
 
-                  <TabsContent value="categories" className="mt-4">
-                    <CategoryManager />
-                  </TabsContent>
-                </Tabs>
-              </SheetContent>
-            </Sheet>
+                    <TabsContent value="members" className="space-y-3 mt-4">
+                      <p className="text-xs text-muted-foreground">Tap the crown to set as Fund Manager</p>
+                      {[...activeTrip.members].sort((a, b) => (activeTrip.fundManagerId === a.id ? -1 : activeTrip.fundManagerId === b.id ? 1 : 0)).map((m) => (
+                        <div key={m.id} className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={async () => await setFundManager(activeTrip.fundManagerId === m.id ? undefined : m.id)}
+                            className={`shrink-0 p-1.5 rounded-md transition-colors ${
+                              activeTrip.fundManagerId === m.id
+                                ? "text-primary bg-primary/10"
+                                : "text-muted-foreground/40"
+                            }`}
+                          >
+                            <Crown className="h-4 w-4" />
+                          </button>
+                          {editingMemberId === m.id ? (
+                            <>
+                              <Input
+                                value={editMemberName}
+                                onChange={(e) => setEditMemberName(e.target.value)}
+                                className="flex-1 h-8 text-sm"
+                                autoFocus
+                                onKeyDown={(e) => e.key === "Enter" && handleRenameMember(m.id)}
+                              />
+                              <Button size="sm" className="h-8 gradient-primary border-0" onClick={() => handleRenameMember(m.id)}>Save</Button>
+                            </>
+                          ) : (
+                            <>
+                              <span className="flex-1 text-sm flex items-center gap-1.5">
+                                {m.name}
+                                {activeTrip.fundManagerId === m.id && <FundManagerBadge />}
+                              </span>
+                              {memberUserIds[m.id] ? (
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <UserCheck className="h-3 w-3" /> Linked
+                                </span>
+                              ) : (
+                                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => handleInvite(m.id)}>
+                                  <Link2 className="h-3 w-3 mr-1" /> Invite
+                                </Button>
+                              )}
+                              <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setEditingMemberId(m.id); setEditMemberName(m.name); }}>
+                                Rename
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="New member name"
+                          value={newMemberName}
+                          onChange={(e) => setNewMemberName(e.target.value)}
+                          className="flex-1 h-8 text-sm"
+                          onKeyDown={(e) => e.key === "Enter" && handleAddMember()}
+                        />
+                        <Button size="sm" className="h-8" variant="outline" onClick={handleAddMember}>
+                          <Plus className="h-3 w-3 mr-1" /> Add
+                        </Button>
+                      </div>
+                    </TabsContent>
+
+                    <TabsContent value="categories" className="mt-4">
+                      <CategoryManager />
+                    </TabsContent>
+                  </Tabs>
+                </SheetContent>
+              </Sheet>
+            )}
             <Button
               variant="ghost"
               size="icon"

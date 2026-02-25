@@ -67,6 +67,7 @@ export function useTripStore() {
   const [loading, setLoading] = useState(true);
 
   const activeTrip = trips.find((t) => t.id === activeTripId) || null;
+  const isOwner = activeTrip ? activeTrip.owner_id === user?.id : true;
 
   // Load trips for the current user
   const loadTrips = useCallback(async () => {
@@ -379,6 +380,7 @@ export function useTripStore() {
     getCategoryBreakdown,
     getSettlements,
     getMemberName,
+    isOwner,
     refreshTrips: loadTrips,
     createInvite,
     getMemberUserIds,

@@ -33,7 +33,7 @@ import {
 
 
 export default function SummaryPage() {
-  const { activeTrip, getStats, getSettlements, getMemberName, deleteTransaction, updateTransaction } = useTrip();
+  const { activeTrip, getStats, getSettlements, getMemberName, deleteTransaction, updateTransaction, isOwner } = useTrip();
   const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState("");
@@ -351,33 +351,37 @@ export default function SummaryPage() {
                               <span className={cn("font-display font-bold text-sm shrink-0", isDeposit ? "text-deposit" : "text-expense")}>
                                 {isDeposit ? "+" : "-"}{tx.amount.toFixed(2)}
                               </span>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground" onClick={() => startEdit(tx)}>
-                                <Pencil className="h-3 w-3" />
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground">
-                                    <Trash2 className="h-3 w-3" />
+                              {isOwner && (
+                                <>
+                                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground" onClick={() => startEdit(tx)}>
+                                    <Pencil className="h-3 w-3" />
                                   </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      This will permanently remove this {tx.type} of {activeTrip.currency} {tx.amount.toFixed(2)}.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction
-                                      onClick={async () => { await deleteTransaction(tx.id); toast.success("Transaction deleted!"); }}
-                                      className="bg-destructive text-destructive-foreground"
-                                    >
-                                      Delete
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground">
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                        <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                          This will permanently remove this {tx.type} of {activeTrip.currency} {tx.amount.toFixed(2)}.
+                                        </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                        <AlertDialogAction
+                                          onClick={async () => { await deleteTransaction(tx.id); toast.success("Transaction deleted!"); }}
+                                          className="bg-destructive text-destructive-foreground"
+                                        >
+                                          Delete
+                                        </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                  </AlertDialog>
+                                </>
+                              )}
                             </div>
                           )}
                         </CardContent>

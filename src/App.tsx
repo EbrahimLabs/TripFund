@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuthContext } from "@/context/AuthContext";
-import { TripProvider } from "@/context/TripContext";
+import { TripProvider, useTrip } from "@/context/TripContext";
 import AuthPage from "./pages/AuthPage";
 import ResetPassword from "./pages/ResetPassword";
 import Index from "./pages/Index";
@@ -37,6 +37,12 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function OwnerRoute({ children }: { children: React.ReactNode }) {
+  const { isOwner } = useTrip();
+  if (!isOwner) return <Navigate to="/dashboard" replace />;
+  return <>{children}</>;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -55,8 +61,8 @@ const App = () => (
                     <Route path="/" element={<Index />} />
                     <Route path="/account" element={<AccountPage />} />
                     <Route path="/dashboard" element={<TripDashboard />} />
-                    <Route path="/deposit" element={<AddDeposit />} />
-                    <Route path="/expense" element={<AddExpense />} />
+                    <Route path="/deposit" element={<OwnerRoute><AddDeposit /></OwnerRoute>} />
+                    <Route path="/expense" element={<OwnerRoute><AddExpense /></OwnerRoute>} />
                     <Route path="/settle" element={<SettlementPage />} />
                     <Route path="/summary" element={<SummaryPage />} />
                     <Route path="*" element={<NotFound />} />
