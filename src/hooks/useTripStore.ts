@@ -336,6 +336,28 @@ export function useTripStore() {
     return activeTrip?.members.find((m) => m.id === id)?.name || "Unknown";
   }, [activeTrip]);
 
+  const createInvite = useCallback(async (memberId: string) => {
+    if (!activeTripId) return null;
+    const { data, error } = await supabase
+      .from("trip_invites")
+      .insert({ trip_id: activeTripId, member_id: memberId })
+      .select("token")
+      .single();
+    if (error || !data) { if (import.meta.env.DEV) console.error(error); return null; }
+    return data.token;
+  }, [activeTripId]);
+
+  const getMemberUserIds = useCallback(async () => {
+    if (!activeTripId) return {};
+    const { data } = await supabase
+      .from("trip_members")
+      .select("id, user_id")
+      .eq("trip_id", activeTripId);
+    const map: Record<string, string | null> = {};
+    (data || []).forEach((m: any) => { map[m.id] = m.user_id; });
+    return map;
+  }, [activeTripId]);
+
   return {
     trips,
     activeTrip,
@@ -358,5 +380,7 @@ export function useTripStore() {
     getSettlements,
     getMemberName,
     refreshTrips: loadTrips,
+    createInvite,
+    getMemberUserIds,
   };
 }
