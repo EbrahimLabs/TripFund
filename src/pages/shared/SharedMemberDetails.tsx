@@ -31,6 +31,7 @@ export default function SharedMemberDetails() {
             trip={trip}
             memberId={memberId}
             bottomNav={<SharedBottomNav />}
+            backTo=".."
         />
     );
 }
