@@ -193,7 +193,7 @@ export default function SummaryPage() {
                   placeholder="Search notes, categories, members…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-8 text-sm pl-8 pr-8 glass border-0"
+                  className="h-8 text-sm pl-8 pr-8 glass"
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
@@ -204,7 +204,7 @@ export default function SummaryPage() {
               <Button
                 variant={showFilters ? "default" : "outline"}
                 size="sm"
-                className={`h-8 px-2.5 shrink-0 ${showFilters ? "gradient-primary border-0" : "glass border-0"}`}
+                className={`h-8 px-2.5 shrink-0 ${showFilters ? "gradient-primary border-0" : "glass"}`}
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <SlidersHorizontal className="h-3.5 w-3.5" />
