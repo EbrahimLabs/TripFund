@@ -22,6 +22,8 @@ import InvitePage from "./pages/InvitePage";
 import SharedDashboard from "./pages/shared/SharedDashboard";
 import SharedSettle from "./pages/shared/SharedSettle";
 import SharedSummary from "./pages/shared/SharedSummary";
+import SharedMemberDetails from "./pages/shared/SharedMemberDetails";
+import MemberDetails from "./pages/MemberDetails";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -67,6 +69,7 @@ function TripLayout() {
       <Route path="/summary" element={<SummaryPage />} />
       <Route path="/settings" element={<OwnerRoute><TripSettings /></OwnerRoute>} />
       <Route path="/account" element={<AccountPage />} />
+      <Route path="/member/:memberId" element={<MemberDetails />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
@@ -78,6 +81,7 @@ function SharedTripLayout() {
       <Route path="dashboard" element={<SharedDashboard />} />
       <Route path="settle" element={<SharedSettle />} />
       <Route path="summary" element={<SharedSummary />} />
+      <Route path="member/:memberId" element={<SharedMemberDetails />} />
       <Route path="*" element={<Navigate to="dashboard" replace />} />
     </Routes>
   );

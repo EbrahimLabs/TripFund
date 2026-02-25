@@ -1,4 +1,5 @@
 import { useSharedTrip } from "@/context/SharedTripContext";
+import { useNavigate } from "react-router-dom";
 import { PageShell } from "@/components/PageShell";
 import { SharedBottomNav } from "@/components/SharedBottomNav";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +18,7 @@ const CHART_COLORS = [
 
 export default function SharedDashboard() {
   const { trip, loading, error, getStats, getMemberBalances, getDailyExpenses, getCategoryBreakdown } = useSharedTrip();
+  const navigate = useNavigate();
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center gradient-hero mesh-bg">
@@ -137,11 +139,14 @@ export default function SharedDashboard() {
           <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider">Members ({balances.length})</h2>
           <AnimatePresence>
             {[...balances].sort((a, b) => (trip.fundManagerId === a.member.id ? -1 : trip.fundManagerId === b.member.id ? 1 : 0)).map((b, i) => (
-              <motion.div key={b.member.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
-                <Card className="glass card-elevated border-0">
+              <motion.div key={b.member.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                onClick={() => navigate(`../member/${b.member.id}`)}
+                className="cursor-pointer"
+              >
+                <Card className="glass card-elevated border-0 group hover:bg-white/[0.02] transition-colors">
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-display font-semibold text-sm flex items-center gap-1.5">
+                      <span className="font-display font-semibold text-sm flex items-center gap-1.5 group-hover:text-primary transition-colors">
                         {b.member.name}
                         {trip.fundManagerId === b.member.id && <FundManagerBadge />}
                       </span>
