@@ -22,7 +22,7 @@ export function PageShell({ title, children, className, action, backTo, icon: Ic
 
   return (
     <div className={cn("min-h-screen pb-24 mesh-bg", className)}>
-      <header className="sticky top-0 z-40 glass-strong px-4 py-3.5" style={{ borderBottom: '1px solid var(--glass-border)' }}>
+      <header className="sticky top-0 z-40 px-4 py-3.5 backdrop-blur-md bg-background/60" style={{ maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)' }}>
         <div className="mx-auto flex max-w-lg items-center gap-2">
           {backTo && (
             <Button
