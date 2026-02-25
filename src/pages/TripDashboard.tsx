@@ -217,7 +217,7 @@ export default function TripDashboard() {
                   <BarChart data={dailyExpenses}>
                     <XAxis
                       dataKey="date"
-                      tick={{ fontSize: 10, fill: "hsl(250, 10%, 45%)" }}
+                      tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                       tickFormatter={(d: string) => d.slice(5)}
                       axisLine={false}
                       tickLine={false}
