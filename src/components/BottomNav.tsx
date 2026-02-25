@@ -2,17 +2,20 @@ import { Link, useLocation } from "react-router-dom";
 import { LayoutDashboard, PlusCircle, Receipt, Handshake, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { useTrip } from "@/context/TripContext";
 
-const navItems = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/deposit", icon: PlusCircle, label: "Deposit" },
-  { to: "/expense", icon: Receipt, label: "Expense" },
-  { to: "/settle", icon: Handshake, label: "Settle" },
-  { to: "/summary", icon: FileText, label: "Summary" },
+const allNavItems = [
+  { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard", ownerOnly: false },
+  { to: "/deposit", icon: PlusCircle, label: "Deposit", ownerOnly: true },
+  { to: "/expense", icon: Receipt, label: "Expense", ownerOnly: true },
+  { to: "/settle", icon: Handshake, label: "Settle", ownerOnly: false },
+  { to: "/summary", icon: FileText, label: "Summary", ownerOnly: false },
 ];
 
 export function BottomNav() {
   const { pathname } = useLocation();
+  const { isOwner } = useTrip();
+  const navItems = allNavItems.filter((item) => !item.ownerOnly || isOwner);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom px-4 pb-3 pt-1">
