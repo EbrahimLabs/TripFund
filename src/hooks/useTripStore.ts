@@ -56,6 +56,7 @@ export interface Trip {
     memberId?: string;
     category?: string;
     subcategory?: string;
+    createdAt?: string;
     splits?: { memberId: string; shareAmount: number }[];
   }[];
 }
@@ -79,6 +80,11 @@ export function useTripStore() {
 
   const activeTrip = trips.find((t) => t.id === activeTripId) || null;
   const isOwner = activeTrip ? activeTrip.owner_id === user?.id : true;
+
+  // Helper to update a single trip in state
+  const updateTripInState = useCallback((tripId: string, updater: (trip: Trip) => Trip) => {
+    setTrips((prev) => prev.map((t) => (t.id === tripId ? updater(t) : t)));
+  }, []);
 
   // Load trips for the current user
   const loadTrips = useCallback(async () => {
@@ -130,6 +136,7 @@ export function useTripStore() {
             memberId: t.member_id,
             category: t.category,
             subcategory: t.subcategory,
+            createdAt: t.created_at,
             splits: txSplits.length > 0
               ? txSplits.map((s: any) => ({ memberId: s.member_id, shareAmount: Number(s.share_amount) }))
               : undefined,
@@ -159,41 +166,65 @@ export function useTripStore() {
       trip_id: trip.id,
       display_name: n,
       is_fund_manager: fundManagerIndex !== undefined && fundManagerIndex === i,
-      user_id: i === 0 ? user.id : null, // first member is the creator
+      user_id: i === 0 ? user.id : null,
     }));
 
-    await supabase.from("trip_members").insert(memberInserts);
-    await loadTrips();
+    const { data: insertedMembers } = await supabase.from("trip_members").insert(memberInserts).select();
+
+    const fundMember = (insertedMembers || []).find((m: any) => m.is_fund_manager);
+
+    // Optimistic: add the new trip to state immediately
+    const newTrip: Trip = {
+      id: trip.id,
+      name: trip.name,
+      currency: trip.currency,
+      owner_id: trip.owner_id,
+      created_at: trip.created_at,
+      fundManagerId: fundMember?.id,
+      members: (insertedMembers || []).map((m: any) => ({ id: m.id, name: m.display_name })),
+      transactions: [],
+    };
+    setTrips((prev) => [newTrip, ...prev]);
     setActiveTripId(trip.id);
     return trip;
-  }, [user, loadTrips]);
+  }, [user]);
 
   const editTripDetails = useCallback(async (name: string, currency: string) => {
     if (!activeTripId) return;
     await supabase.from("trips").update({ name, currency }).eq("id", activeTripId);
-    await loadTrips();
-  }, [activeTripId, loadTrips]);
+    // Optimistic update
+    updateTripInState(activeTripId, (t) => ({ ...t, name, currency }));
+  }, [activeTripId, updateTripInState]);
 
   const setFundManager = useCallback(async (memberId: string | undefined) => {
     if (!activeTripId) return;
-    // Clear all fund managers for this trip
     await supabase.from("trip_members").update({ is_fund_manager: false }).eq("trip_id", activeTripId);
     if (memberId) {
       await supabase.from("trip_members").update({ is_fund_manager: true }).eq("id", memberId);
     }
-    await loadTrips();
-  }, [activeTripId, loadTrips]);
+    // Optimistic update
+    updateTripInState(activeTripId, (t) => ({ ...t, fundManagerId: memberId }));
+  }, [activeTripId, updateTripInState]);
 
   const addMember = useCallback(async (name: string) => {
     if (!activeTripId) return;
-    await supabase.from("trip_members").insert({ trip_id: activeTripId, display_name: name });
-    await loadTrips();
-  }, [activeTripId, loadTrips]);
+    const { data: inserted } = await supabase.from("trip_members").insert({ trip_id: activeTripId, display_name: name }).select().single();
+    if (inserted) {
+      updateTripInState(activeTripId, (t) => ({
+        ...t,
+        members: [...t.members, { id: inserted.id, name: inserted.display_name }],
+      }));
+    }
+  }, [activeTripId, updateTripInState]);
 
   const renameMember = useCallback(async (memberId: string, newName: string) => {
     await supabase.from("trip_members").update({ display_name: newName }).eq("id", memberId);
-    await loadTrips();
-  }, [loadTrips]);
+    // Optimistic update across all trips
+    setTrips((prev) => prev.map((t) => ({
+      ...t,
+      members: t.members.map((m) => (m.id === memberId ? { ...m, name: newName } : m)),
+    })));
+  }, []);
 
   const addTransaction = useCallback(async (tx: {
     type: "deposit" | "expense";
@@ -207,7 +238,6 @@ export function useTripStore() {
   }) => {
     if (!activeTripId) return;
 
-    // For deposits, memberId is the depositor. For expenses, we use the first member or a placeholder.
     const memberId = tx.memberId || activeTrip?.members[0]?.id;
     if (!memberId) return;
 
@@ -228,6 +258,7 @@ export function useTripStore() {
 
     if (error || !inserted) { if (import.meta.env.DEV) console.error(error); return; }
 
+    let insertedSplits: { memberId: string; shareAmount: number }[] | undefined;
     if (tx.splits && tx.splits.length > 0) {
       const splitInserts = tx.splits.map((s) => ({
         transaction_id: inserted.id,
@@ -235,10 +266,75 @@ export function useTripStore() {
         share_amount: s.shareAmount,
       }));
       await supabase.from("expense_splits").insert(splitInserts);
+      insertedSplits = tx.splits;
     }
 
-    await loadTrips();
-  }, [activeTripId, activeTrip, loadTrips]);
+    // Optimistic update
+    const newTx = {
+      id: inserted.id,
+      type: tx.type as "deposit" | "expense",
+      amount: tx.amount,
+      date: tx.date,
+      note: tx.note || "",
+      memberId,
+      category: tx.category,
+      subcategory: tx.subcategory,
+      createdAt: inserted.created_at || new Date().toISOString(),
+      splits: insertedSplits,
+    };
+
+    updateTripInState(activeTripId, (t) => ({
+      ...t,
+      transactions: [...t.transactions, newTx],
+    }));
+
+    return inserted.id;
+  }, [activeTripId, activeTrip, updateTripInState]);
+
+  // Batch add deposits for multiple members at once (single state update)
+  const addBatchDeposits = useCallback(async (deposits: {
+    amount: number;
+    date: string;
+    note: string;
+    memberIds: string[];
+  }) => {
+    if (!activeTripId) return;
+
+    const insertRows = deposits.memberIds.map((mid) => ({
+      trip_id: activeTripId,
+      type: "deposit" as const,
+      amount: deposits.amount,
+      date: deposits.date,
+      note: deposits.note || "",
+      member_id: mid,
+    }));
+
+    const { data: insertedRows, error } = await supabase
+      .from("transactions")
+      .insert(insertRows)
+      .select();
+
+    if (error || !insertedRows) { if (import.meta.env.DEV) console.error(error); return; }
+
+    // Single optimistic state update for all deposits
+    const newTxs = insertedRows.map((row: any) => ({
+      id: row.id,
+      type: "deposit" as const,
+      amount: Number(row.amount),
+      date: row.date,
+      note: row.note || "",
+      memberId: row.member_id,
+      category: undefined,
+      subcategory: undefined,
+      createdAt: row.created_at || new Date().toISOString(),
+      splits: undefined,
+    }));
+
+    updateTripInState(activeTripId, (t) => ({
+      ...t,
+      transactions: [...t.transactions, ...newTxs],
+    }));
+  }, [activeTripId, updateTripInState]);
 
   const updateTransaction = useCallback(async (txId: string, updates: {
     amount?: number;
@@ -265,19 +361,36 @@ export function useTripStore() {
       }
     }
 
-    await loadTrips();
-  }, [loadTrips]);
+    // Optimistic update
+    setTrips((prev) => prev.map((t) => ({
+      ...t,
+      transactions: t.transactions.map((tx) => {
+        if (tx.id !== txId) return tx;
+        return {
+          ...tx,
+          ...(updates.amount !== undefined ? { amount: updates.amount } : {}),
+          ...(updates.note !== undefined ? { note: updates.note } : {}),
+          ...(updates.splits ? { splits: updates.splits } : {}),
+        };
+      }),
+    })));
+  }, []);
 
   const deleteTransaction = useCallback(async (txId: string) => {
     await supabase.from("transactions").delete().eq("id", txId);
-    await loadTrips();
-  }, [loadTrips]);
+    // Optimistic update
+    setTrips((prev) => prev.map((t) => ({
+      ...t,
+      transactions: t.transactions.filter((tx) => tx.id !== txId),
+    })));
+  }, []);
 
   const deleteTrip = useCallback(async (tripId: string) => {
     await supabase.from("trips").delete().eq("id", tripId);
     if (activeTripId === tripId) setActiveTripId(null);
-    await loadTrips();
-  }, [activeTripId, loadTrips]);
+    // Optimistic update
+    setTrips((prev) => prev.filter((t) => t.id !== tripId));
+  }, [activeTripId]);
 
   // Computed values
   const getStats = useCallback(() => {
@@ -331,7 +444,6 @@ export function useTripStore() {
     for (const b of balances) {
       if (b.net < -0.01) {
         if (b.member.id === activeTrip.fundManagerId) {
-          // Fund manager also owes the fund (self-settlement)
           settlements.push({
             fromId: b.member.id,
             toId: b.member.id,
@@ -339,7 +451,6 @@ export function useTripStore() {
             completed: false,
           });
         } else {
-          // Member owes the fund manager
           settlements.push({
             fromId: b.member.id,
             toId: activeTrip.fundManagerId,
@@ -348,7 +459,6 @@ export function useTripStore() {
           });
         }
       } else if (b.net > 0.01 && b.member.id !== activeTrip.fundManagerId) {
-        // Fund manager owes this member back
         settlements.push({
           fromId: activeTrip.fundManagerId,
           toId: b.member.id,
@@ -386,7 +496,6 @@ export function useTripStore() {
     if (!activeTripId) return;
     const key = `${fromId}_${toId}`;
 
-    // Create a deposit for the member who owes
     const { data: inserted, error } = await supabase
       .from("transactions")
       .insert({
@@ -402,13 +511,24 @@ export function useTripStore() {
 
     if (error || !inserted) { if (import.meta.env.DEV) console.error(error); return; }
 
-    // Track the transaction ID so we can delete it if unmarked
     const map = getSettlementTxMap();
     map[key] = inserted.id;
     saveSettlementTxMap(map);
 
-    await loadTrips();
-  }, [activeTripId, getSettlementTxMap, saveSettlementTxMap, loadTrips]);
+    // Optimistic update
+    updateTripInState(activeTripId, (t) => ({
+      ...t,
+      transactions: [...t.transactions, {
+        id: inserted.id,
+        type: "deposit" as const,
+        amount,
+        date: new Date().toISOString().split("T")[0],
+        note: "[Settlement]",
+        memberId: fromId,
+        createdAt: inserted.created_at || new Date().toISOString(),
+      }],
+    }));
+  }, [activeTripId, getSettlementTxMap, saveSettlementTxMap, updateTripInState]);
 
   const unmarkSettlementPaid = useCallback(async (fromId: string, toId: string) => {
     if (!activeTripId) return;
@@ -420,10 +540,14 @@ export function useTripStore() {
       await supabase.from("transactions").delete().eq("id", txId);
       delete map[key];
       saveSettlementTxMap(map);
-    }
 
-    await loadTrips();
-  }, [activeTripId, getSettlementTxMap, saveSettlementTxMap, loadTrips]);
+      // Optimistic update
+      updateTripInState(activeTripId, (t) => ({
+        ...t,
+        transactions: t.transactions.filter((tx) => tx.id !== txId),
+      }));
+    }
+  }, [activeTripId, getSettlementTxMap, saveSettlementTxMap, updateTripInState]);
 
   const getMemberName = useCallback((id: string) => {
     return activeTrip?.members.find((m) => m.id === id)?.name || "Unknown";
@@ -465,6 +589,7 @@ export function useTripStore() {
     addMember,
     renameMember,
     addTransaction,
+    addBatchDeposits,
     updateTransaction,
     deleteTransaction,
     deleteTrip,

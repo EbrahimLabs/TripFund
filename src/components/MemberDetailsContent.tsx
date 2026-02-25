@@ -50,8 +50,8 @@ export function MemberDetailsContent({ trip, memberId, bottomNav, backTo = "/das
             }
         });
 
-        // Sort transactions newest first
-        memberTransactions.sort((a, b) => b.date.localeCompare(a.date) || b.originTx.id.localeCompare(a.originTx.id));
+        // Sort transactions newest first, then by createdAt to keep same-day items stable
+        memberTransactions.sort((a, b) => b.date.localeCompare(a.date) || (b.originTx.createdAt || "").localeCompare(a.originTx.createdAt || ""));
 
         return {
             deposited,
