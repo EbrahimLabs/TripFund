@@ -1,56 +1,100 @@
 
 
-## Top Bar UI Improvement Plan
+## Account Management & Member Invite System
 
 ### Current State
-The top bar (`PageShell`) is a thin sticky header with:
-- Trip name as gradient text (left)
-- Small 8x8 ghost icon buttons for theme toggle + action buttons (right)
-- `glass-strong` background with `px-4 py-3` padding
-- On the Index page, the top bar is just two tiny icons floating in the top-right corner
+- Auth exists: email/password + Google OAuth sign-in
+- `profiles` table has: `id`, `display_name`, `avatar_url`, `created_at`, `updated_at`
+- `trip_members` has a nullable `user_id` column (linking members to accounts)
+- No account management page exists
+- No invite system exists
 
-The result feels cramped, utilitarian, and lacks visual identity. The icons are tiny (h-4 w-4 inside h-8 w-8 buttons) and hard to tap on mobile.
+### Plan
 
-### Proposed Changes
+#### 1. Account/Profile Page (`src/pages/AccountPage.tsx`)
+A new page accessible from the home screen header, containing:
+- **Display name**: editable field, saves to `profiles.display_name`
+- **Email**: shown read-only from `user.email`
+- **Change password**: form with current password not required (uses `supabase.auth.updateUser`)
+- **Sign out**: button
+- **Delete account**: confirmation dialog, then calls a backend function to delete the user and cascade data
 
-**1. Redesigned `PageShell` header**
-- Add a back arrow (ChevronLeft or ArrowLeft from Lucide) on the left for sub-pages, giving clear navigation context
-- Make the title centered and slightly larger with better font weight
-- Increase touch target sizes from h-8 w-8 to h-9 w-9 with rounded-xl shape
-- Add a subtle bottom border separator using the glass-border variable
-- Increase vertical padding from py-3 to py-3.5 for more breathing room
-- Add a Framer Motion fade-in on the title for polish
+Route: `/account` (protected)
 
-**2. Redesigned Index page top bar**
-- Replace the floating icons with a proper top bar that includes the TripFund logo/icon (small Wallet icon) on the left, "TripFund" text, and action icons on the right
-- Consistent styling with PageShell header
+#### 2. Delete Account Backend Function
+A backend function (`delete-account`) that:
+- Verifies the authenticated user
+- Deletes the user from `auth.users` (cascades to profiles, trip_members via FK)
+- Uses the service role key to perform admin-level deletion
 
-**3. Dashboard-specific header enhancement**
-- Show a compact version of the trip name with a small MapPin icon prefix
-- Keep Settings and LogOut as action icons but with improved sizing
+#### 3. Invite Members via Link
+**How it works:**
+1. Trip owner taps "Invite" on a trip member in settings
+2. System generates a unique invite token stored in a new `trip_invites` table
+3. A shareable link is generated (e.g., `https://tripfund.lovable.app/invite/{token}`)
+4. When someone opens the link:
+   - If not logged in: redirected to auth page, then back to invite
+   - If logged in: shown the trip name and a "Join" button
+   - On join: their `user_id` is linked to the matching `trip_member` row
 
-### Files to Modify
+**Database migration:**
+```sql
+CREATE TABLE public.trip_invites (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  trip_id uuid REFERENCES public.trips(id) ON DELETE CASCADE NOT NULL,
+  member_id uuid REFERENCES public.trip_members(id) ON DELETE CASCADE NOT NULL,
+  token text UNIQUE NOT NULL DEFAULT encode(gen_random_bytes(16), 'hex'),
+  accepted_by uuid REFERENCES auth.users(id) ON DELETE SET NULL,
+  expires_at timestamptz NOT NULL DEFAULT (now() + interval '7 days'),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
 
-| File | Change |
-|------|--------|
-| `src/components/PageShell.tsx` | Redesign header layout: optional back button, centered or left-aligned title with icon, larger touch targets, motion animation, bottom separator |
-| `src/pages/Index.tsx` | Replace floating top-right icons with a consistent top bar matching PageShell style |
-| `src/pages/TripDashboard.tsx` | Add MapPin icon next to trip name in the action prop |
+ALTER TABLE public.trip_invites ENABLE ROW LEVEL SECURITY;
+
+-- Trip owners can create invites
+CREATE POLICY "Trip owners can manage invites"
+  ON public.trip_invites FOR ALL TO authenticated
+  USING (trip_id IN (SELECT id FROM public.trips WHERE owner_id = auth.uid()));
+
+-- Anyone authenticated can read invites by token (to accept)
+CREATE POLICY "Authenticated users can view invites by token"
+  ON public.trip_invites FOR SELECT TO authenticated
+  USING (true);
+```
+
+#### 4. Invite Page (`src/pages/InvitePage.tsx`)
+- Route: `/invite/:token`
+- Fetches invite details (trip name, member name)
+- If expired or already accepted: shows error
+- Otherwise: "Join as {member_name}" button
+- On accept: updates `trip_members.user_id` and `trip_invites.accepted_by`
+
+#### 5. UI Changes
+
+**Home page header** (`src/pages/Index.tsx`):
+- Add a user avatar/icon button that navigates to `/account`
+
+**Trip Settings members tab** (`src/pages/TripDashboard.tsx`):
+- Add "Invite" button next to each unlinked member (no `user_id`)
+- Shows a share sheet with the invite link (using `navigator.share` or copy-to-clipboard)
+- Members already linked show a "Linked" badge
+
+**App router** (`src/App.tsx`):
+- Add `/account` route (protected)
+- Add `/invite/:token` route (protected, inside `AuthProvider` but outside `TripProvider`)
 
 ### Technical Details
 
-**PageShell updates:**
-- Add optional `backTo` prop (string path) to show a back button
-- Add optional `icon` prop (LucideIcon) to show an icon before the title
-- Wrap title in `motion.h1` with a subtle fade-in
-- Increase button sizes: `h-9 w-9` with `rounded-xl`
-- Icon sizes inside buttons: `h-[18px] w-[18px]` for better tap targets
+**Files to create:**
+- `src/pages/AccountPage.tsx` - profile management UI
+- `src/pages/InvitePage.tsx` - invite acceptance page
+- `supabase/functions/delete-account/index.ts` - account deletion edge function
+- Database migration for `trip_invites` table
 
-**Index page updates:**
-- Move the theme toggle and sign-out into a proper sticky top bar with `glass-strong` styling
-- Add small Wallet icon + "TripFund" branding on the left side of the bar
-
-**Animations:**
-- `motion.h1` with `initial={{ opacity: 0, x: -8 }}` and `animate={{ opacity: 1, x: 0 }}` for the page title
-- Spring transition for smoothness
+**Files to modify:**
+- `src/App.tsx` - add routes
+- `src/pages/Index.tsx` - add account button in header
+- `src/pages/TripDashboard.tsx` - add invite buttons in member settings
+- `src/hooks/useAuth.ts` - add `deleteAccount` method
+- `src/hooks/useTripStore.ts` - add `createInvite` and `acceptInvite` methods
 
