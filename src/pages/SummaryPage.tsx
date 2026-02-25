@@ -162,6 +162,7 @@ export default function SummaryPage() {
     <>
       <PageShell
         title="Summary"
+        backTo="/dashboard"
         action={
           <Button variant="ghost" size="sm" onClick={handleShare}>
             <Share2 className="h-4 w-4" />

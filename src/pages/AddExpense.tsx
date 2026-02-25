@@ -168,7 +168,7 @@ export default function AddExpense() {
 
   return (
     <>
-      <PageShell title="Add Expense">
+      <PageShell title="Add Expense" backTo="/dashboard">
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Amount */}
           <div className="space-y-2">

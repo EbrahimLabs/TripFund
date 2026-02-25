@@ -47,7 +47,7 @@ export default function AddDeposit() {
 
   return (
     <>
-      <PageShell title="Add Deposit">
+      <PageShell title="Add Deposit" backTo="/dashboard">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
