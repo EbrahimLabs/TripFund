@@ -126,7 +126,7 @@ export default function AddExpense() {
   const getPercentageTotal = () =>
     selectedMembers.reduce((s, id) => s + (parseFloat(percentages[id] || "0")), 0);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const splits = computeSplits();
     if (!splits) {
@@ -135,7 +135,7 @@ export default function AddExpense() {
       return;
     }
 
-    addTransaction({
+    await addTransaction({
       type: "expense",
       amount: parseFloat(amount),
       date,

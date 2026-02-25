@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Transaction } from "@/types/trip";
+
 
 export default function SummaryPage() {
   const { activeTrip, getStats, getSettlements, getMemberName, deleteTransaction, updateTransaction } = useTrip();
@@ -85,17 +85,17 @@ export default function SummaryPage() {
 
   if (!activeTrip) return null;
 
-  const startEdit = (tx: Transaction) => {
+  const startEdit = (tx: any) => {
     setEditingId(tx.id);
     setEditAmount(tx.amount.toString());
     setEditNote(tx.note);
   };
 
-  const saveEdit = (tx: Transaction) => {
+  const saveEdit = async (tx: any) => {
     const amt = parseFloat(editAmount);
     if (!amt || amt <= 0) return;
 
-    const updates: Partial<Omit<Transaction, "id">> = {
+    const updates: any = {
       amount: amt,
       note: editNote,
     };
@@ -103,10 +103,10 @@ export default function SummaryPage() {
     // Recalculate splits if expense
     if (tx.type === "expense" && tx.splits) {
       const shareAmount = Math.round((amt / tx.splits.length) * 100) / 100;
-      updates.splits = tx.splits.map((s) => ({ ...s, shareAmount }));
+      updates.splits = tx.splits.map((s: any) => ({ ...s, shareAmount }));
     }
 
-    updateTransaction(tx.id, updates);
+    await updateTransaction(tx.id, updates);
     setEditingId(null);
     toast.success("Transaction updated!");
   };
@@ -369,7 +369,7 @@ export default function SummaryPage() {
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
-                                      onClick={() => { deleteTransaction(tx.id); toast.success("Transaction deleted!"); }}
+                                      onClick={async () => { await deleteTransaction(tx.id); toast.success("Transaction deleted!"); }}
                                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                     >
                                       Delete
