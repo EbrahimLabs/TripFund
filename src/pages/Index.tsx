@@ -55,12 +55,22 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative gradient-hero mesh-bg">
-      <div className="absolute top-4 right-4 z-20 flex items-center gap-1">
-        <ThemeToggle />
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={signOut} title="Sign out">
-          <LogOut className="h-4 w-4" />
-        </Button>
-      </div>
+      <header className="fixed top-0 left-0 right-0 z-40 glass-strong px-4 py-3.5" style={{ borderBottom: '1px solid var(--glass-border)' }}>
+        <div className="mx-auto flex max-w-lg items-center gap-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg gradient-primary shrink-0">
+              <Wallet className="h-3.5 w-3.5 text-primary-foreground" />
+            </div>
+            <span className="text-lg font-display font-bold tracking-tight gradient-text">TripFund</span>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <ThemeToggle />
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-muted-foreground" onClick={signOut} title="Sign out">
+              <LogOut className="h-[18px] w-[18px]" />
+            </Button>
+          </div>
+        </div>
+      </header>
 
       {/* Decorative orbs */}
       <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl animate-pulse-soft" />

@@ -5,7 +5,7 @@ import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { BottomNav } from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
-import { ArrowDownCircle, ArrowUpCircle, Wallet, LogOut, Settings, Plus, TrendingUp, Crown } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Wallet, LogOut, Settings, Plus, TrendingUp, Crown, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -80,12 +80,13 @@ export default function TripDashboard() {
     <>
       <PageShell
         title={activeTrip.name}
+        icon={MapPin}
         action={
           <div className="flex gap-1">
             <Sheet open={showSettings} onOpenChange={setShowSettings}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground">
-                  <Settings className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-muted-foreground">
+                  <Settings className="h-[18px] w-[18px]" />
                 </Button>
               </SheetTrigger>
               <SheetContent className="overflow-y-auto glass">
@@ -169,10 +170,10 @@ export default function TripDashboard() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground"
+              className="h-9 w-9 rounded-xl text-muted-foreground"
               onClick={() => { setActiveTripId(null); navigate("/"); }}
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-[18px] w-[18px]" />
             </Button>
           </div>
         }

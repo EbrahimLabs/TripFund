@@ -61,7 +61,7 @@ export default function SettlementPage() {
 
   return (
     <>
-      <PageShell title="Settlement">
+      <PageShell title="Settlement" backTo="/dashboard">
         {settlements.length === 0 ? (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12 space-y-3">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl gradient-primary glow-primary">
