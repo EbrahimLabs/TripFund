@@ -85,7 +85,7 @@ export default function AddDeposit() {
                       prev.includes(m.id) ? prev.filter((x) => x !== m.id) : [...prev, m.id]
                     )
                   }
-                  className="w-full"
+                  className={`w-full transition-all ${selectedMembers.includes(m.id) ? "gradient-primary glow-sm border-0" : "glass border-0"}`}
                 >
                   {m.name}
                   {activeTrip.fundManagerId === m.id && <> <FundManagerBadge /></>}
@@ -106,7 +106,7 @@ export default function AddDeposit() {
               min="0"
               step="0.01"
               autoFocus
-              className="text-2xl font-display font-bold h-14"
+              className="text-2xl font-display font-bold h-14 glass border-0"
             />
           </div>
 
@@ -117,6 +117,7 @@ export default function AddDeposit() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
+              className="glass border-0"
             />
           </div>
 
@@ -128,10 +129,11 @@ export default function AddDeposit() {
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={2}
+              className="glass border-0"
             />
           </div>
 
-          <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={!amount || selectedMembers.length === 0}>
+          <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0}>
             Add Deposit
           </Button>
         </form>

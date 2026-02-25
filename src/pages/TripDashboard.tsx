@@ -18,10 +18,10 @@ import { CategoryManager } from "@/components/CategoryManager";
 import { FundManagerBadge } from "@/components/FundManagerBadge";
 
 const CHART_COLORS = [
-  "hsl(160, 60%, 38%)",
+  "hsl(260, 65%, 55%)",
+  "hsl(280, 60%, 60%)",
+  "hsl(300, 50%, 60%)",
   "hsl(38, 90%, 55%)",
-  "hsl(0, 72%, 51%)",
-  "hsl(220, 60%, 50%)",
 ];
 
 export default function TripDashboard() {
@@ -42,7 +42,6 @@ export default function TripDashboard() {
     if (!activeTrip) navigate("/");
     else {
       setTripName(activeTrip.name);
-      
     }
   }, [activeTrip, navigate]);
 
@@ -89,12 +88,12 @@ export default function TripDashboard() {
                   <Settings className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
-              <SheetContent className="overflow-y-auto">
+              <SheetContent className="overflow-y-auto glass">
                 <SheetHeader>
                   <SheetTitle>Trip Settings</SheetTitle>
                 </SheetHeader>
                 <Tabs defaultValue="general" className="mt-4">
-                  <TabsList className="w-full">
+                  <TabsList className="w-full glass">
                     <TabsTrigger value="general" className="flex-1 text-xs">General</TabsTrigger>
                     <TabsTrigger value="members" className="flex-1 text-xs">Members</TabsTrigger>
                     <TabsTrigger value="categories" className="flex-1 text-xs">Categories</TabsTrigger>
@@ -105,7 +104,7 @@ export default function TripDashboard() {
                       <Label>Trip Name</Label>
                       <Input value={tripName} onChange={(e) => setTripName(e.target.value)} />
                     </div>
-                    <Button onClick={handleSaveSettings} className="w-full">Save Changes</Button>
+                    <Button onClick={handleSaveSettings} className="w-full gradient-primary border-0">Save Changes</Button>
                   </TabsContent>
 
                   <TabsContent value="members" className="space-y-3 mt-4">
@@ -132,7 +131,7 @@ export default function TripDashboard() {
                               autoFocus
                               onKeyDown={(e) => e.key === "Enter" && handleRenameMember(m.id)}
                             />
-                            <Button size="sm" className="h-8" onClick={() => handleRenameMember(m.id)}>Save</Button>
+                            <Button size="sm" className="h-8 gradient-primary border-0" onClick={() => handleRenameMember(m.id)}>Save</Button>
                           </>
                         ) : (
                           <>
@@ -178,24 +177,33 @@ export default function TripDashboard() {
           </div>
         }
       >
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 mb-6">
-          {[
-            { icon: ArrowDownCircle, label: "Deposited", value: stats.totalDeposited, color: "text-deposit", bg: "bg-primary/5 border-primary/10" },
-            { icon: ArrowUpCircle, label: "Spent", value: stats.totalSpent, color: "text-expense", bg: "bg-destructive/5 border-destructive/10" },
-            { icon: Wallet, label: "Balance", value: stats.balance, color: "text-primary", bg: "bg-secondary border-secondary" },
-          ].map(({ icon: Icon, label, value, color, bg }) => (
-            <motion.div key={label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <Card className={bg}>
-                <CardContent className="p-3 text-center">
-                  <Icon className={cn("h-4 w-4 mx-auto mb-1", color)} />
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  <p className="text-sm font-display font-bold">{activeTrip.currency} {value.toFixed(0)}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+        {/* Hero Balance Card */}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <Card className="gradient-card glow-primary border-0 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2 blur-2xl" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/5 translate-y-1/2 -translate-x-1/2 blur-xl" />
+            <CardContent className="p-5 relative z-10">
+              <p className="text-sm text-white/70 mb-1">Total Balance</p>
+              <p className="text-3xl font-display font-bold text-white">{activeTrip.currency} {stats.balance.toFixed(0)}</p>
+              <div className="flex gap-6 mt-4">
+                <div className="flex items-center gap-2">
+                  <ArrowDownCircle className="h-4 w-4 text-white/70" />
+                  <div>
+                    <p className="text-[10px] text-white/60 uppercase tracking-wider">Deposited</p>
+                    <p className="text-sm font-display font-semibold text-white">{activeTrip.currency} {stats.totalDeposited.toFixed(0)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ArrowUpCircle className="h-4 w-4 text-white/70" />
+                  <div>
+                    <p className="text-[10px] text-white/60 uppercase tracking-wider">Spent</p>
+                    <p className="text-sm font-display font-semibold text-white">{activeTrip.currency} {stats.totalSpent.toFixed(0)}</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Daily Expenses Chart */}
         {dailyExpenses.length > 0 && (
@@ -203,24 +211,28 @@ export default function TripDashboard() {
             <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <TrendingUp className="h-3.5 w-3.5" /> Daily Spending
             </h2>
-            <Card>
+            <Card className="glass card-elevated border-0">
               <CardContent className="p-3 pt-4">
                 <ResponsiveContainer width="100%" height={140}>
                   <BarChart data={dailyExpenses}>
                     <XAxis
                       dataKey="date"
-                      tick={{ fontSize: 10, fill: "hsl(160, 10%, 45%)" }}
+                      tick={{ fontSize: 10, fill: "hsl(250, 10%, 45%)" }}
                       tickFormatter={(d: string) => d.slice(5)}
                       axisLine={false}
                       tickLine={false}
                     />
                     <YAxis hide />
                     <Tooltip
-                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(160, 15%, 88%)" }}
+                      contentStyle={{ fontSize: 12, borderRadius: 12, border: "none", background: "var(--glass-bg)", backdropFilter: "blur(16px)", boxShadow: "var(--glass-shadow)" }}
                       formatter={(value: number) => [`${activeTrip.currency} ${value.toFixed(2)}`, "Spent"]}
                       labelFormatter={(label: string) => label}
                     />
-                    <Bar dataKey="amount" radius={[4, 4, 0, 0]} fill="hsl(160, 60%, 38%)" />
+                    <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
+                      {dailyExpenses.map((_, index) => (
+                        <Cell key={index} fill={`hsl(${260 + index * 5}, 60%, ${55 + index * 2}%)`} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -234,7 +246,7 @@ export default function TripDashboard() {
             <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider mb-3">
               By Category
             </h2>
-            <Card>
+            <Card className="glass card-elevated border-0">
               <CardContent className="p-3 flex items-center gap-4">
                 <div className="w-24 h-24 shrink-0">
                   <ResponsiveContainer width="100%" height="100%">
@@ -247,6 +259,7 @@ export default function TripDashboard() {
                         innerRadius={20}
                         outerRadius={40}
                         strokeWidth={2}
+                        stroke="transparent"
                       >
                         {categoryBreakdown.map((_, i) => (
                           <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
@@ -274,8 +287,8 @@ export default function TripDashboard() {
         {/* Empty State */}
         {activeTrip.transactions.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-8 space-y-3">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-secondary">
-              <Wallet className="h-6 w-6 text-muted-foreground" />
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl gradient-primary glow-primary">
+              <Wallet className="h-6 w-6 text-primary-foreground" />
             </div>
             <p className="text-sm text-muted-foreground">No transactions yet.<br />Start by adding a deposit or expense!</p>
           </motion.div>
@@ -292,7 +305,7 @@ export default function TripDashboard() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
-                <Card>
+                <Card className="glass card-elevated border-0">
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-display font-semibold text-sm flex items-center gap-1.5">

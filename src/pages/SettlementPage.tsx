@@ -64,8 +64,8 @@ export default function SettlementPage() {
       <PageShell title="Settlement">
         {settlements.length === 0 ? (
           <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12 space-y-3">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10">
-              <PartyPopper className="h-6 w-6 text-primary" />
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl gradient-primary glow-primary">
+              <PartyPopper className="h-6 w-6 text-primary-foreground" />
             </div>
             <p className="text-muted-foreground font-medium">All settled up! 🎉</p>
             <p className="text-xs text-muted-foreground">No outstanding balances.</p>
@@ -87,7 +87,7 @@ export default function SettlementPage() {
                 >
                   <Card
                     className={cn(
-                      "transition-all duration-300",
+                      "glass card-elevated border-0 transition-all duration-300",
                       completed.has(key) && "opacity-50 scale-[0.98]"
                     )}
                   >
@@ -104,7 +104,7 @@ export default function SettlementPage() {
                             {activeTrip.fundManagerId === s.toId && <FundManagerBadge />}
                           </span>
                         </div>
-                        <p className="text-lg font-display font-bold text-primary mt-0.5">
+                        <p className="text-lg font-display font-bold gradient-text mt-0.5">
                           {activeTrip.currency} {s.amount.toFixed(2)}
                         </p>
                         {completed.has(key) && (
@@ -114,7 +114,7 @@ export default function SettlementPage() {
                       <Button
                         variant={completed.has(key) ? "default" : "outline"}
                         size="icon"
-                        className={cn("h-10 w-10 shrink-0 transition-all", completed.has(key) && "bg-primary")}
+                        className={cn("h-10 w-10 shrink-0 transition-all rounded-xl", completed.has(key) && "gradient-primary glow-sm border-0")}
                         onClick={() => toggleComplete(key)}
                       >
                         <Check className="h-4 w-4" />
