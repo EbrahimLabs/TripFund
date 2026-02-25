@@ -33,7 +33,7 @@ import {
 
 
 export default function SummaryPage() {
-  const { activeTrip, getStats, getSettlements, getMemberName, deleteTransaction, updateTransaction, isOwner } = useTrip();
+  const { activeTrip, getStats, getSettlements, getMemberName, deleteTransaction, updateTransaction, isOwner, loading } = useTrip();
   const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editAmount, setEditAmount] = useState("");
@@ -80,8 +80,8 @@ export default function SummaryPage() {
   }, [activeTrip, filter, searchQuery, memberFilter, dateFrom, dateTo, getMemberName]);
 
   useEffect(() => {
-    if (!activeTrip) navigate("/");
-  }, [activeTrip, navigate]);
+    if (!loading && !activeTrip) navigate("/");
+  }, [activeTrip, loading, navigate]);
 
   if (!activeTrip) return null;
 
@@ -160,7 +160,7 @@ export default function SummaryPage() {
 
   return (
     <>
-    <PageShell
+      <PageShell
         title="Summary"
         backTo="/dashboard"
         action={
@@ -426,7 +426,7 @@ export default function SummaryPage() {
           )}
         </div>
       </PageShell>
-    <BottomNav />
+      <BottomNav />
     </>
   );
 }
