@@ -6,14 +6,14 @@
 
 @layer base {
   :root {
-    --background: 226 33% 97%;
-    --foreground: 228 30% 15%;
+    --background: 220 14% 96%;
+    --foreground: 220 10% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 228 30% 15%;
+    --card-foreground: 220 10% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 228 30% 15%;
+    --popover-foreground: 220 10% 20%;
 
     --primary: 238 100% 65%;
     --primary-foreground: 0 0% 100%;
@@ -21,8 +21,8 @@
     --secondary: 238 100% 90%;
     --secondary-foreground: 238 100% 60%;
 
-    --muted: 228 20% 90%;
-    --muted-foreground: 228 15% 45%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 220 10% 45%;
 
     --accent: 238 100% 90%;
     --accent-foreground: 238 100% 60%;
@@ -39,8 +39,8 @@
     --deposit: 142 71% 45%;
     --expense: 348 83% 47%;
 
-    --border: 228 12% 85%;
-    --input: 228 15% 90%;
+    --border: 220 14% 86%;
+    --input: 220 14% 90%;
     --ring: 238 100% 65%;
 
     --radius: 1.25rem;
@@ -49,8 +49,8 @@
     --font-body: 'DM Sans', sans-serif;
 
     --gradient-primary: linear-gradient(135deg, hsl(238, 100%, 65%) 0%, hsl(242, 100%, 60%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(238, 100%, 65%) 0%, hsl(242, 100%, 60%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(238, 100%, 65%) 0%, hsl(242, 100%, 60%) 100%);
+    --gradient-hero: linear-gradient(160deg, hsl(0, 0%, 100%) 0%, hsl(220, 14%, 96%) 35%, hsl(220, 14%, 92%) 65%, hsl(220, 14%, 90%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(220, 14%, 96%) 100%);
     --glass-bg: hsla(0, 0%, 100%, 0.7);
     --glass-border: hsla(230, 30%, 80%, 0.4);
     --glass-shadow: 0 8px 32px hsla(230, 40%, 30%, 0.08);
@@ -59,9 +59,9 @@
     --sidebar-foreground: 228 10% 26%;
     --sidebar-primary: 238 100% 65%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 228 25% 95%;
-    --sidebar-accent-foreground: 228 30% 10%;
-    --sidebar-border: 228 15% 91%;
+    --sidebar-accent: 220 14% 96%;
+    --sidebar-accent-foreground: 220 10% 20%;
+    --sidebar-border: 220 14% 86%;
     --sidebar-ring: 238 100% 65%;
   }
 

@@ -23,7 +23,7 @@ export function PageShell({ title, children, className, action, backTo, icon: Ic
 
   return (
     <div className={cn("min-h-screen pb-24 mesh-bg", className)}>
-      <header className="sticky top-0 z-40 px-4 pt-12 pb-8 mesh-header rounded-b-[2rem] shadow-xl text-white">
+      <header className="sticky top-0 z-40 px-4 pt-6 pb-6 mesh-header rounded-b-[2rem] shadow-xl text-white">
         <div className="mx-auto flex max-w-lg items-center gap-2">
           {backTo && (
             <Button
