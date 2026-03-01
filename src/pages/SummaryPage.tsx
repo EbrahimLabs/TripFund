@@ -3,15 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { useTrip } from "@/context/TripContext";
 import { PageShell } from "@/components/PageShell";
 import { BottomNav } from "@/components/BottomNav";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Share2, Trash2, ArrowDownCircle, ArrowUpCircle, Pencil, X, Check, Search, SlidersHorizontal, CalendarDays, User } from "lucide-react";
+import { Share2, Trash2, Pencil, X, Check, Search, SlidersHorizontal, CalendarDays, User } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import { FundManagerBadge } from "@/components/FundManagerBadge";
+import { SummaryContent } from "@/components/SummaryContent";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -154,13 +152,40 @@ export default function SummaryPage() {
     }
   };
 
-  // Group transactions by date
-  const txByDate: Record<string, typeof allTx> = {};
-  allTx.forEach((tx) => {
-    if (!txByDate[tx.date]) txByDate[tx.date] = [];
-    txByDate[tx.date].push(tx);
-  });
-  const sortedDates = Object.keys(txByDate).sort((a, b) => b.localeCompare(a));
+  const renderActions = isOwner ? (tx: any) => {
+    if (editingId === tx.id) return null; // handled separately in inline edit below
+    return (
+      <>
+        <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground" onClick={() => startEdit(tx)}>
+          <Pencil className="h-3 w-3" />
+        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground">
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently remove this {tx.type} of {activeTrip.currency} {tx.amount.toFixed(2)}.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={async () => { await deleteTransaction(tx.id); toast.success("Transaction deleted!"); }}
+                className="bg-destructive text-destructive-foreground"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
+    );
+  } : undefined;
 
   return (
     <>
@@ -280,121 +305,19 @@ export default function SummaryPage() {
             </AnimatePresence>
           </div>
 
-          {/* Transactions by date */}
-          {allTx.length === 0 ? (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-              <p className="text-sm text-muted-foreground">
-                {hasActiveFilters ? "No transactions match your filters." : "No transactions yet."}
-              </p>
-              {hasActiveFilters && (
-                <Button variant="link" size="sm" className="text-xs mt-1" onClick={() => { setSearchQuery(""); setMemberFilter("all"); setDateFrom(""); setDateTo(""); setFilter("all"); }}>
-                  Clear filters
-                </Button>
-              )}
-            </motion.div>
-          ) : (
-            <AnimatePresence>
-              {sortedDates.map((date) => (
-                <motion.div
-                  key={date}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-1.5"
-                >
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider pt-2">
-                    {new Date(date + "T00:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                  </h3>
-                  {txByDate[date].map((tx) => {
-                    const isDeposit = tx.type === "deposit";
-                    const isEditing = editingId === tx.id;
+          {/* Transaction list via shared component */}
+          <SummaryContent
+            trip={activeTrip}
+            transactions={allTx}
+            getMemberName={getMemberName}
+            renderActions={renderActions}
+            emptyMessage={hasActiveFilters ? "No transactions match your filters." : "No transactions yet."}
+          />
 
-                    return (
-                      <Card key={tx.id} className="bg-card shadow-sm border-0 rounded-2xl">
-                        <CardContent className="p-3">
-                          {isEditing ? (
-                            <div className="space-y-2">
-                              <div className="flex gap-2">
-                                <Input
-                                  type="number"
-                                  value={editAmount}
-                                  onChange={(e) => setEditAmount(e.target.value)}
-                                  className="h-8 text-sm flex-1"
-                                  autoFocus
-                                />
-                                <Button size="sm" className="h-8" onClick={() => saveEdit(tx)}>
-                                  <Check className="h-3 w-3" />
-                                </Button>
-                                <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingId(null)}>
-                                  <X className="h-3 w-3" />
-                                </Button>
-                              </div>
-                              <Input
-                                placeholder="Note"
-                                value={editNote}
-                                onChange={(e) => setEditNote(e.target.value)}
-                                className="h-8 text-sm"
-                              />
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-3">
-                              {isDeposit ? (
-                                <ArrowDownCircle className="h-4 w-4 text-deposit shrink-0" />
-                              ) : (
-                                <ArrowUpCircle className="h-4 w-4 text-expense shrink-0" />
-                              )}
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate flex items-center gap-1">
-                                  {isDeposit
-                                    ? <><span>{getMemberName(tx.memberId!)}</span>{activeTrip.fundManagerId === tx.memberId && <FundManagerBadge />}</>
-                                    : `${tx.category}${tx.subcategory ? ` · ${tx.subcategory}` : ""}`}
-                                </p>
-                                <p className="text-xs text-muted-foreground truncate">
-                                  {tx.note || (isDeposit ? "Deposit" : `Split: ${tx.splits?.length || 0} members`)}
-                                </p>
-                              </div>
-                              <span className={cn("font-display font-bold text-sm shrink-0", isDeposit ? "text-deposit" : "text-expense")}>
-                                {isDeposit ? "+" : "-"}{tx.amount.toFixed(2)}
-                              </span>
-                              {isOwner && (
-                                <>
-                                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground" onClick={() => startEdit(tx)}>
-                                    <Pencil className="h-3 w-3" />
-                                  </Button>
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground">
-                                        <Trash2 className="h-3 w-3" />
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Delete transaction?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          This will permanently remove this {tx.type} of {activeTrip.currency} {tx.amount.toFixed(2)}.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction
-                                          onClick={async () => { await deleteTransaction(tx.id); toast.success("Transaction deleted!"); }}
-                                          className="bg-destructive text-destructive-foreground"
-                                        >
-                                          Delete
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </motion.div>
-              ))}
-            </AnimatePresence>
+          {hasActiveFilters && allTx.length === 0 && (
+            <Button variant="link" size="sm" className="text-xs mt-1 w-full" onClick={() => { setSearchQuery(""); setMemberFilter("all"); setDateFrom(""); setDateTo(""); setFilter("all"); }}>
+              Clear filters
+            </Button>
           )}
 
         </div>
