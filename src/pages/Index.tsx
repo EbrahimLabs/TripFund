@@ -56,7 +56,7 @@ const Index = () => {
     setMembers((m) => m.map((v, idx) => (idx === i ? val : v)));
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative mesh-bg">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative">
       <header className="fixed top-0 left-0 right-0 z-40 px-4 py-3.5 backdrop-blur-md bg-background/60" style={{ maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)' }}>
         <div className="mx-auto flex max-w-lg items-center gap-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -72,10 +72,6 @@ const Index = () => {
           )}
         </div>
       </header>
-
-      {/* Decorative orbs */}
-      <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-muted/20 blur-3xl animate-pulse-soft" />
-      <div className="absolute bottom-32 right-8 w-40 h-40 rounded-full bg-muted/20 blur-3xl animate-pulse-soft" style={{ animationDelay: "1s" }} />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
