@@ -127,7 +127,7 @@ const Index = () => {
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </AlertDialogTrigger>
-                            <AlertDialogContent className="glass">
+                            <AlertDialogContent className="bg-card shadow-sm">
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete "{trip.name}"?</AlertDialogTitle>
                                 <AlertDialogDescription>This will permanently delete this trip and all its transactions.</AlertDialogDescription>
@@ -151,7 +151,7 @@ const Index = () => {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="tripName">Trip Name</Label>
-                    <Input id="tripName" placeholder="e.g., Bali 2025" value={tripName} onChange={(e) => setTripName(e.target.value)} autoFocus className="glass" />
+                    <Input id="tripName" placeholder="e.g., Bali 2025" value={tripName} onChange={(e) => setTripName(e.target.value)} autoFocus className="bg-card shadow-sm" />
                   </div>
 
                   <div className="space-y-2">
@@ -176,7 +176,7 @@ const Index = () => {
                             placeholder={`Member ${i + 1}`}
                             value={m}
                             onChange={(e) => updateMember(i, e.target.value)}
-                            className="glass"
+                            className="bg-card shadow-sm"
                           />
                           {members.length > 1 && (
                             <Button variant="ghost" size="icon" onClick={() => removeMember(i)} className="shrink-0">

@@ -20,7 +20,7 @@ export default function SharedSettle() {
 
   if (error || !trip) return (
     <div className="min-h-screen flex items-center justify-center gradient-hero mesh-bg px-4">
-      <Card className="glass card-elevated border-0 max-w-sm w-full">
+      <Card className="bg-card shadow-sm border-0 rounded-2xl max-w-sm w-full">
         <CardContent className="p-5 text-center space-y-3">
           <AlertCircle className="h-10 w-10 text-destructive mx-auto" />
           <p className="text-sm text-muted-foreground">{error || "Trip not found"}</p>
@@ -50,7 +50,7 @@ export default function SharedSettle() {
             <AnimatePresence>
               {settlements.map((s, i) => (
                 <motion.div key={`${s.fromId}_${s.toId}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-                  <Card className="glass card-elevated border-0">
+                  <Card className="bg-card shadow-sm border-0 rounded-2xl">
                     <CardContent className="p-4 flex items-center gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 text-sm">

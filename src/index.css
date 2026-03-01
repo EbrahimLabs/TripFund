@@ -6,63 +6,63 @@
 
 @layer base {
   :root {
-    --background: 228 20% 97%;
-    --foreground: 228 30% 10%;
+    --background: 226 33% 97%;
+    --foreground: 228 30% 15%;
 
-    --card: 228 15% 93%;
-    --card-foreground: 228 30% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 228 30% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 228 30% 10%;
+    --popover-foreground: 228 30% 15%;
 
-    --primary: 230 98% 55%;
+    --primary: 238 100% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 228 30% 93%;
-    --secondary-foreground: 228 30% 20%;
+    --secondary: 238 100% 90%;
+    --secondary-foreground: 238 100% 60%;
 
-    --muted: 228 15% 94%;
-    --muted-foreground: 228 10% 45%;
+    --muted: 228 20% 90%;
+    --muted-foreground: 228 15% 45%;
 
-    --accent: 215 85% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 238 100% 90%;
+    --accent-foreground: 238 100% 60%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 348 83% 47%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 152 60% 42%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 38 90% 15%;
 
-    --deposit: 230 98% 55%;
-    --expense: 0 72% 51%;
+    --deposit: 142 71% 45%;
+    --expense: 348 83% 47%;
 
     --border: 228 12% 85%;
     --input: 228 15% 90%;
-    --ring: 230 98% 55%;
+    --ring: 238 100% 65%;
 
-    --radius: 0.875rem;
+    --radius: 1.25rem;
 
     --font-display: 'Space Grotesk', sans-serif;
     --font-body: 'DM Sans', sans-serif;
 
-    --gradient-primary: linear-gradient(135deg, hsl(230, 98%, 55%) 0%, hsl(222, 90%, 52%) 40%, hsl(215, 85%, 50%) 100%);
-    --gradient-hero: linear-gradient(160deg, hsl(230, 30%, 94%) 0%, hsl(222, 25%, 95%) 35%, hsl(215, 20%, 96%) 65%, hsl(228, 20%, 97%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(230, 90%, 55%) 0%, hsl(222, 82%, 53%) 30%, hsl(215, 80%, 52%) 60%, hsl(240, 65%, 56%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(238, 100%, 65%) 0%, hsl(242, 100%, 60%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(238, 100%, 65%) 0%, hsl(242, 100%, 60%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(238, 100%, 65%) 0%, hsl(242, 100%, 60%) 100%);
     --glass-bg: hsla(0, 0%, 100%, 0.7);
     --glass-border: hsla(230, 30%, 80%, 0.4);
     --glass-shadow: 0 8px 32px hsla(230, 40%, 30%, 0.08);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 228 10% 26%;
-    --sidebar-primary: 230 98% 55%;
+    --sidebar-primary: 238 100% 65%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 228 25% 95%;
     --sidebar-accent-foreground: 228 30% 10%;
     --sidebar-border: 228 15% 91%;
-    --sidebar-ring: 230 98% 55%;
+    --sidebar-ring: 238 100% 65%;
   }
 
   .dark {
@@ -131,7 +131,12 @@
     font-family: var(--font-body);
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
   }
 }
@@ -140,6 +145,7 @@
   .font-display {
     font-family: var(--font-display);
   }
+
   .font-body {
     font-family: var(--font-body);
   }
@@ -219,9 +225,29 @@
     width: 200%;
     height: 200%;
     background: radial-gradient(ellipse at 20% 50%, hsla(230, 98%, 55%, 0.06) 0%, hsla(230, 98%, 55%, 0.02) 30%, transparent 60%),
-                radial-gradient(ellipse at 80% 20%, hsla(215, 85%, 50%, 0.05) 0%, hsla(215, 85%, 50%, 0.015) 30%, transparent 60%),
-                radial-gradient(ellipse at 50% 80%, hsla(240, 65%, 56%, 0.03) 0%, hsla(240, 65%, 56%, 0.01) 30%, transparent 60%);
+      radial-gradient(ellipse at 80% 20%, hsla(215, 85%, 50%, 0.05) 0%, hsla(215, 85%, 50%, 0.015) 30%, transparent 60%),
+      radial-gradient(ellipse at 50% 80%, hsla(240, 65%, 56%, 0.03) 0%, hsla(240, 65%, 56%, 0.01) 30%, transparent 60%);
     pointer-events: none;
     z-index: 0;
+  }
+
+  .mesh-header {
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at top left, hsl(238, 90%, 75%) 0%, hsl(238, 100%, 65%) 30%, hsl(242, 100%, 60%) 100%);
+  }
+
+  .mesh-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -20%;
+    width: 140%;
+    height: 100%;
+    background: radial-gradient(ellipse at bottom left, transparent 40%, hsla(238, 100%, 75%, 0.2) 50%, transparent 60%),
+      radial-gradient(ellipse at top right, transparent 30%, hsla(238, 80%, 50%, 0.3) 50%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.8;
   }
 }

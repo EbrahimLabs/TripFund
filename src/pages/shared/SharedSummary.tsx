@@ -13,7 +13,7 @@ import { FundManagerBadge } from "@/components/FundManagerBadge";
 
 export default function SharedSummary() {
   const { token } = useParams<{ token: string }>();
-  const { trip, loading, error, getStats, getSettlements, getMemberName } = useSharedTrip();
+  const { trip, loading, error, getStats, getMemberName } = useSharedTrip();
 
   const allTx = useMemo(() => {
     if (!trip) return [];
@@ -28,7 +28,7 @@ export default function SharedSummary() {
 
   if (error || !trip) return (
     <div className="min-h-screen flex items-center justify-center gradient-hero mesh-bg px-4">
-      <Card className="glass card-elevated border-0 max-w-sm w-full">
+      <Card className="bg-card shadow-sm border-0 rounded-2xl max-w-sm w-full">
         <CardContent className="p-5 text-center space-y-3">
           <AlertCircle className="h-10 w-10 text-destructive mx-auto" />
           <p className="text-sm text-muted-foreground">{error || "Trip not found"}</p>
@@ -38,7 +38,6 @@ export default function SharedSummary() {
   );
 
   const stats = getStats();
-  const settlements = getSettlements();
 
   const txByDate: Record<string, typeof allTx> = {};
   allTx.forEach((tx) => {
@@ -88,7 +87,7 @@ export default function SharedSummary() {
                   {txByDate[date].map((tx) => {
                     const isDeposit = tx.type === "deposit";
                     return (
-                      <Card key={tx.id} className="glass card-elevated border-0">
+                      <Card key={tx.id} className="bg-card shadow-sm border-0 rounded-2xl">
                         <CardContent className="p-3">
                           <div className="flex items-center gap-3">
                             {isDeposit ? (
@@ -119,34 +118,6 @@ export default function SharedSummary() {
             </AnimatePresence>
           )}
 
-          {settlements.length > 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider mb-2">Settlements</h2>
-              <div className="space-y-1.5">
-                {settlements.map((s, i) => (
-                  <Card key={i} className="glass card-elevated border-0">
-                    <CardContent className="p-3">
-                      <p className="text-sm">
-                        <span className="font-semibold inline-flex items-center gap-1">
-                          {getMemberName(s.fromId)}
-                          {trip.fundManagerId === s.fromId && <FundManagerBadge />}
-                        </span>
-                        {" pays "}
-                        <span className="font-semibold inline-flex items-center gap-1">
-                          {getMemberName(s.toId)}
-                          {trip.fundManagerId === s.toId && <FundManagerBadge />}
-                        </span>
-                        {" "}
-                        <span className="font-display font-bold text-primary">
-                          {trip.currency} {s.amount.toFixed(2)}
-                        </span>
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </motion.div>
-          )}
         </div>
       </PageShell>
       <SharedBottomNav />

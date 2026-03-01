@@ -171,7 +171,7 @@ export default function SummaryPage() {
       >
         <div className="space-y-4">
           {/* Filter tabs */}
-          <div className="flex gap-1.5 p-1 glass rounded-xl">
+          <div className="flex gap-1.5 p-1 bg-white shadow-sm rounded-xl">
             {(["all", "deposit", "expense"] as const).map((f) => (
               <Button
                 key={f}
@@ -194,7 +194,7 @@ export default function SummaryPage() {
                   placeholder="Search notes, categories, members…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-8 text-sm pl-8 pr-8 glass"
+                  className="h-8 text-sm pl-8 pr-8 bg-white border-0 shadow-sm"
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
@@ -205,7 +205,7 @@ export default function SummaryPage() {
               <Button
                 variant={showFilters ? "default" : "outline"}
                 size="sm"
-                className={`h-8 px-2.5 shrink-0 ${showFilters ? "gradient-primary border-0" : "glass"}`}
+                className={`h-8 px-2.5 shrink-0 ${showFilters ? "gradient-primary border-0 shadow-sm text-white" : "bg-white border-0 shadow-sm text-muted-foreground"}`}
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -221,7 +221,7 @@ export default function SummaryPage() {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-2 gap-2 p-3 glass rounded-xl">
+                  <div className="grid grid-cols-2 gap-2 p-3 bg-white shadow-sm rounded-xl">
                     <div className="col-span-2 space-y-1">
                       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                         <User className="h-3 w-3" /> Member
@@ -305,7 +305,7 @@ export default function SummaryPage() {
                     const isEditing = editingId === tx.id;
 
                     return (
-                      <Card key={tx.id} className="glass card-elevated border-0">
+                      <Card key={tx.id} className="bg-card shadow-sm border-0 rounded-2xl">
                         <CardContent className="p-3">
                           {isEditing ? (
                             <div className="space-y-2">
@@ -393,37 +393,6 @@ export default function SummaryPage() {
             </AnimatePresence>
           )}
 
-          {/* Settlements */}
-          {settlements.length > 0 && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Settlements
-              </h2>
-              <div className="space-y-1.5">
-                {settlements.map((s, i) => (
-                  <Card key={i} className="glass card-elevated border-0">
-                    <CardContent className="p-3">
-                      <p className="text-sm">
-                        <span className="font-semibold inline-flex items-center gap-1">
-                          {getMemberName(s.fromId)}
-                          {activeTrip.fundManagerId === s.fromId && <FundManagerBadge />}
-                        </span>
-                        {" pays "}
-                        <span className="font-semibold inline-flex items-center gap-1">
-                          {getMemberName(s.toId)}
-                          {activeTrip.fundManagerId === s.toId && <FundManagerBadge />}
-                        </span>
-                        {" "}
-                        <span className="font-display font-bold text-primary">
-                          {activeTrip.currency} {s.amount.toFixed(2)}
-                        </span>
-                      </p>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </motion.div>
-          )}
         </div>
       </PageShell>
       <BottomNav />

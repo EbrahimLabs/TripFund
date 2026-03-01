@@ -66,7 +66,7 @@ export default function AddDeposit() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               {[...activeTrip.members].sort((a, b) => (activeTrip.fundManagerId === a.id ? -1 : activeTrip.fundManagerId === b.id ? 1 : 0)).map((m) => (
-                <Button key={m.id} type="button" variant={selectedMembers.includes(m.id) ? "default" : "outline"} size="sm" onClick={() => setSelectedMembers((prev) => prev.includes(m.id) ? prev.filter((x) => x !== m.id) : [...prev, m.id])} className={`w-full transition-all ${selectedMembers.includes(m.id) ? "gradient-primary glow-sm border-0" : "glass"}`}>
+                <Button key={m.id} type="button" variant={selectedMembers.includes(m.id) ? "default" : "outline"} size="sm" onClick={() => setSelectedMembers((prev) => prev.includes(m.id) ? prev.filter((x) => x !== m.id) : [...prev, m.id])} className={`w-full transition-all ${selectedMembers.includes(m.id) ? "gradient-primary glow-sm border-0" : "bg-card shadow-sm"}`}>
                   {m.name}
                   {activeTrip.fundManagerId === m.id && <> <FundManagerBadge /></>}
                 </Button>
@@ -79,11 +79,11 @@ export default function AddDeposit() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="date">Date</Label>
-            <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="glass" />
+            <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-card shadow-sm" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="note">Note (optional)</Label>
-            <Textarea id="note" placeholder="e.g., Cash deposit" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="glass" />
+            <Textarea id="note" placeholder="e.g., Cash deposit" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="bg-card shadow-sm" />
           </div>
           <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0 || submitting}>{submitting ? <><Loader2 className="h-5 w-5 animate-spin" /> Adding...</> : "Add Deposit"}</Button>
         </form>

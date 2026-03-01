@@ -68,7 +68,7 @@ export default function TripSettings() {
         <TabsContent value="general" className="space-y-4">
           <div className="space-y-2">
             <Label>Trip Name</Label>
-            <Input value={tripName} onChange={(e) => setTripName(e.target.value)} className="glass" />
+            <Input value={tripName} onChange={(e) => setTripName(e.target.value)} className="bg-card shadow-sm" />
           </div>
           <Button onClick={handleSave} className="w-full gradient-primary border-0">Save Changes</Button>
         </TabsContent>
