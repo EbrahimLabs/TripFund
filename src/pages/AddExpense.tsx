@@ -62,7 +62,11 @@ export default function AddExpense() {
     }
   }, [selectedMembers.length]);
 
-  if (!activeTrip) return null;
+  if (!activeTrip) return (
+    <div className="min-h-screen flex items-center justify-center gradient-hero mesh-bg">
+      <div className="animate-pulse text-primary font-display text-lg">Loading...</div>
+    </div>
+  );
 
   const toggleMember = (id: string) =>
     setSelectedMembers((prev) =>
@@ -297,6 +301,11 @@ export default function AddExpense() {
           </div>
 
           <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0 || submitting}>{submitting ? <><Loader2 className="h-5 w-5 animate-spin" /> Adding...</> : "Add Expense"}</Button>
+          {!submitting && (selectedMembers.length === 0 || !amount) && (
+            <p className="text-xs text-muted-foreground text-center mt-1">
+              {selectedMembers.length === 0 ? "Select at least one member to split with" : "Enter an amount to continue"}
+            </p>
+          )}
         </form>
       </PageShell>
       <BottomNav />

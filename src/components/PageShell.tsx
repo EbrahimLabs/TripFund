@@ -3,7 +3,7 @@ import { ChevronLeft, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useSidebar } from "@/components/ui/sidebar";
+import { useSidebarSafe } from "@/hooks/useSidebarSafe";
 import type { LucideIcon } from "lucide-react";
 
 interface PageShellProps {
@@ -18,8 +18,7 @@ interface PageShellProps {
 
 export function PageShell({ title, children, className, action, backTo, icon: Icon, hero }: PageShellProps) {
   const navigate = useNavigate();
-  let sidebarCtx: ReturnType<typeof useSidebar> | null = null;
-  try { sidebarCtx = useSidebar(); } catch { }
+  const sidebarCtx = useSidebarSafe();
 
   return (
     <div className={cn("min-h-screen pb-24 mesh-bg", className)}>

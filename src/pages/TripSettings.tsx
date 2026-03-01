@@ -6,14 +6,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Crown, Plus, UserCheck } from "lucide-react";
+import { Crown, Plus, UserCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { CategoryManager } from "@/components/CategoryManager";
 import { FundManagerBadge } from "@/components/FundManagerBadge";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function TripSettings() {
   const {
-    activeTrip, editTripDetails, addMember, renameMember,
+    activeTrip, editTripDetails, addMember, renameMember, deleteMember,
     setFundManager, getMemberUserIds, loading,
   } = useTrip();
   const navigate = useNavigate();
@@ -31,7 +35,11 @@ export default function TripSettings() {
     }
   }, [activeTrip, loading, navigate, getMemberUserIds]);
 
-  if (!activeTrip) return null;
+  if (!activeTrip) return (
+    <div className="min-h-screen flex items-center justify-center gradient-hero mesh-bg">
+      <div className="animate-pulse text-primary font-display text-lg">Loading...</div>
+    </div>
+  );
 
   const handleSave = async () => {
     if (tripName.trim()) {
@@ -54,6 +62,15 @@ export default function TripSettings() {
       setEditingMemberId(null);
       setEditMemberName("");
     }
+  };
+
+  const handleDeleteMember = async (id: string) => {
+    if (activeTrip.members.length <= 2) {
+      toast.error("A trip must have at least 2 members");
+      return;
+    }
+    await deleteMember(id);
+    toast.success("Member removed!");
   };
 
   return (
@@ -83,8 +100,8 @@ export default function TripSettings() {
                   type="button"
                   onClick={async () => await setFundManager(activeTrip.fundManagerId === m.id ? undefined : m.id)}
                   className={`shrink-0 p-1.5 rounded-md transition-colors ${activeTrip.fundManagerId === m.id
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground/40"
+                    ? "text-primary bg-primary/10"
+                    : "text-muted-foreground/40"
                     }`}
                 >
                   <Crown className="h-4 w-4" />
@@ -114,6 +131,29 @@ export default function TripSettings() {
                     <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => { setEditingMemberId(m.id); setEditMemberName(m.name); }}>
                       Rename
                     </Button>
+                    {activeTrip.members.length > 2 && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive">
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="bg-card shadow-sm">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Remove "{m.name}"?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will remove this member from the trip. Their existing transactions will remain.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteMember(m.id)} className="bg-destructive text-destructive-foreground">
+                              Remove
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   </>
                 )}
               </div>
