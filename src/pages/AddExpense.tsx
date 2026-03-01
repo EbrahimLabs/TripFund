@@ -206,27 +206,25 @@ export default function AddExpense() {
           </div>
 
           {/* Subcategory */}
-          <AnimatePresence mode="wait">
-            <motion.div key={category} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2 overflow-hidden">
-              <div className="flex items-center justify-between">
-                <Label>Subcategory</Label>
-                <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2 gap-1" onClick={() => setShowAddSub((v) => !v)}><Plus className="h-3 w-3" /> Add</Button>
-              </div>
-              <AnimatePresence>
-                {showAddSub && (
-                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden">
-                    <Input placeholder="New subcategory..." value={newSubcategory} onChange={(e) => setNewSubcategory(e.target.value)} className="h-8 text-xs glass" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSubcategory(); } }} />
-                    <Button type="button" size="sm" className="h-8 text-xs gradient-primary border-0" onClick={handleAddSubcategory}>Add</Button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <div className="flex flex-wrap gap-1.5">
-                {getSubcategories(category).map((sub) => (
-                  <Button key={sub} type="button" variant={subcategory === sub ? "secondary" : "ghost"} size="sm" onClick={() => setSubcategory(sub)} className="text-xs h-7 px-2.5">{sub}</Button>
-                ))}
-              </div>
-            </motion.div>
-          </AnimatePresence>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label>Subcategory</Label>
+              <Button type="button" variant="ghost" size="sm" className="text-xs h-6 px-2 gap-1" onClick={() => setShowAddSub((v) => !v)}><Plus className="h-3 w-3" /> Add</Button>
+            </div>
+            <AnimatePresence>
+              {showAddSub && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="flex gap-2 overflow-hidden">
+                  <Input placeholder="New subcategory..." value={newSubcategory} onChange={(e) => setNewSubcategory(e.target.value)} className="h-8 text-xs glass" onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAddSubcategory(); } }} />
+                  <Button type="button" size="sm" className="h-8 text-xs gradient-primary border-0" onClick={handleAddSubcategory}>Add</Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <div className="flex flex-wrap gap-1.5">
+              {getSubcategories(category).map((sub) => (
+                <Button key={sub} type="button" variant={subcategory === sub ? "secondary" : "ghost"} size="sm" onClick={() => setSubcategory(sub)} className="text-xs h-7 px-2.5">{sub}</Button>
+              ))}
+            </div>
+          </div>
 
           {/* Split Mode */}
           <div className="space-y-2">
