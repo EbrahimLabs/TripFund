@@ -26,8 +26,8 @@ export default defineConfig(({ mode }) => ({
         name: 'TripFund',
         short_name: 'TripFund',
         description: 'Shared Travel Money App',
-        theme_color: '#4D4CFF',
-        background_color: '#f6f7f9',
+        theme_color: '#4D52FF',
+        background_color: '#4D52FF',
         display: 'standalone',
         icons: [
           {
