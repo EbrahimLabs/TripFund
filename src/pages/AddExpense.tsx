@@ -181,7 +181,7 @@ export default function AddExpense() {
           {/* Amount */}
           <div className="space-y-2">
             <Label htmlFor="expAmount">Amount (BDT)</Label>
-            <Input id="expAmount" type="number" inputMode="decimal" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} min="0" step="0.01" autoFocus className="text-2xl font-display font-bold h-14 glass" />
+            <Input id="expAmount" type="number" inputMode="decimal" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} min="0" step="0.01" className="text-2xl font-display font-bold h-14 glass" />
           </div>
 
           {/* Category */}

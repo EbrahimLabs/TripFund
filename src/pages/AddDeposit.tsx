@@ -79,7 +79,7 @@ export default function AddDeposit() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="amount">Amount ({activeTrip.currency})</Label>
-            <Input id="amount" type="number" inputMode="decimal" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} min="0" step="0.01" autoFocus className="text-2xl font-display font-bold h-14 glass" />
+            <Input id="amount" type="number" inputMode="decimal" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} min="0" step="0.01" className="text-2xl font-display font-bold h-14 glass" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="date">Date</Label>
