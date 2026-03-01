@@ -234,7 +234,7 @@
   .mesh-header {
     position: relative;
     overflow: hidden;
-    background: radial-gradient(circle at top left, hsl(238, 90%, 75%) 0%, hsl(238, 100%, 65%) 30%, hsl(242, 100%, 60%) 100%);
+    background: hsl(238, 100%, 65%);
   }
 
   .mesh-header::before {
@@ -244,8 +244,8 @@
     left: -20%;
     width: 140%;
     height: 100%;
-    background: radial-gradient(ellipse at bottom left, transparent 40%, hsla(238, 100%, 75%, 0.2) 50%, transparent 60%),
-      radial-gradient(ellipse at top right, transparent 30%, hsla(238, 80%, 50%, 0.3) 50%, transparent 70%);
+    /* removed highlights to keep color solid */
+    background: none;
     pointer-events: none;
     z-index: 0;
     opacity: 0.8;
