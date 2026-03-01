@@ -226,6 +226,18 @@ export function useTripStore() {
     })));
   }, []);
 
+  const deleteMember = useCallback(async (memberId: string) => {
+    if (!activeTripId) return;
+    // Delete from Supabase
+    await supabase.from("trip_members").delete().eq("id", memberId);
+    // Optimistic update: remove member from state
+    updateTripInState(activeTripId, (t) => ({
+      ...t,
+      members: t.members.filter((m) => m.id !== memberId),
+      fundManagerId: t.fundManagerId === memberId ? undefined : t.fundManagerId,
+    }));
+  }, [activeTripId, updateTripInState]);
+
   const addTransaction = useCallback(async (tx: {
     type: "deposit" | "expense";
     amount: number;
@@ -588,6 +600,7 @@ export function useTripStore() {
     editTripDetails,
     addMember,
     renameMember,
+    deleteMember,
     addTransaction,
     addBatchDeposits,
     updateTransaction,

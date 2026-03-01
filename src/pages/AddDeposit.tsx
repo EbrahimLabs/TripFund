@@ -32,7 +32,11 @@ export default function AddDeposit() {
     if (!loading && !activeTrip) navigate("/");
   }, [activeTrip, loading, navigate]);
 
-  if (!activeTrip) return null;
+  if (!activeTrip) return (
+    <div className="min-h-screen flex items-center justify-center gradient-hero mesh-bg">
+      <div className="animate-pulse text-primary font-display text-lg">Loading...</div>
+    </div>
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,6 +90,11 @@ export default function AddDeposit() {
             <Textarea id="note" placeholder="e.g., Cash deposit" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="bg-card shadow-sm" />
           </div>
           <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0 || submitting}>{submitting ? <><Loader2 className="h-5 w-5 animate-spin" /> Adding...</> : "Add Deposit"}</Button>
+          {!submitting && (selectedMembers.length === 0 || !amount) && (
+            <p className="text-xs text-muted-foreground text-center mt-1">
+              {selectedMembers.length === 0 ? "Select at least one member" : "Enter an amount to continue"}
+            </p>
+          )}
         </form>
       </PageShell>
       <BottomNav />

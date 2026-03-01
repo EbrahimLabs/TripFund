@@ -28,7 +28,11 @@ export default function TripDashboard() {
     if (!loading && !activeTrip) navigate("/");
   }, [activeTrip, loading, navigate]);
 
-  if (!activeTrip) return null;
+  if (!activeTrip) return (
+    <div className="min-h-screen flex items-center justify-center gradient-hero mesh-bg">
+      <div className="animate-pulse text-primary font-display text-lg">Loading...</div>
+    </div>
+  );
 
   const stats = getStats();
   const balances = getMemberBalances();
@@ -81,7 +85,7 @@ export default function TripDashboard() {
             <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <TrendingUp className="h-3.5 w-3.5" /> Daily Spending
             </h2>
-            <Card className="bg-card shadow-sm border-0 rounded-3xl">
+            <Card className="bg-card shadow-sm border-0 rounded-2xl">
               <CardContent className="p-3 pt-4">
                 <ResponsiveContainer width="100%" height={140}>
                   <BarChart data={dailyExpenses}>
@@ -104,7 +108,7 @@ export default function TripDashboard() {
         {categoryBreakdown.length > 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mb-6">
             <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider mb-3">By Category</h2>
-            <Card className="bg-card shadow-sm border-0 rounded-3xl">
+            <Card className="bg-card shadow-sm border-0 rounded-2xl">
               <CardContent className="p-3 flex items-center gap-4">
                 <div className="w-24 h-24 shrink-0">
                   <ResponsiveContainer width="100%" height="100%">

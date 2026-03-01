@@ -68,7 +68,11 @@ export default function SettlementPage() {
     }
   }, [activeTrip, loading, navigate]);
 
-  if (!activeTrip) return null;
+  if (!activeTrip) return (
+    <div className="min-h-screen flex items-center justify-center gradient-hero mesh-bg">
+      <div className="animate-pulse text-primary font-display text-lg">Loading...</div>
+    </div>
+  );
 
   const activeSettlements = getSettlements();
   const getKey = (s: { fromId: string; toId: string }) => `${s.fromId}_${s.toId}`;

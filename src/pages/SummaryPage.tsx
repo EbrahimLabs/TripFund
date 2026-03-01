@@ -83,7 +83,11 @@ export default function SummaryPage() {
     if (!loading && !activeTrip) navigate("/");
   }, [activeTrip, loading, navigate]);
 
-  if (!activeTrip) return null;
+  if (!activeTrip) return (
+    <div className="min-h-screen flex items-center justify-center gradient-hero mesh-bg">
+      <div className="animate-pulse text-primary font-display text-lg">Loading...</div>
+    </div>
+  );
 
   const startEdit = (tx: any) => {
     setEditingId(tx.id);
@@ -171,7 +175,7 @@ export default function SummaryPage() {
       >
         <div className="space-y-4">
           {/* Filter tabs */}
-          <div className="flex gap-1.5 p-1 bg-white shadow-sm rounded-xl">
+          <div className="flex gap-1.5 p-1 bg-card shadow-sm rounded-xl">
             {(["all", "deposit", "expense"] as const).map((f) => (
               <Button
                 key={f}
@@ -194,7 +198,7 @@ export default function SummaryPage() {
                   placeholder="Search notes, categories, members…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-8 text-sm pl-8 pr-8 bg-white border-0 shadow-sm"
+                  className="h-8 text-sm pl-8 pr-8 bg-card border-0 shadow-sm"
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery("")} className="absolute right-2.5 top-1/2 -translate-y-1/2">
@@ -205,7 +209,7 @@ export default function SummaryPage() {
               <Button
                 variant={showFilters ? "default" : "outline"}
                 size="sm"
-                className={`h-8 px-2.5 shrink-0 ${showFilters ? "gradient-primary border-0 shadow-sm text-white" : "bg-white border-0 shadow-sm text-muted-foreground"}`}
+                className={`h-8 px-2.5 shrink-0 ${showFilters ? "gradient-primary border-0 shadow-sm text-white" : "bg-card border-0 shadow-sm text-muted-foreground"}`}
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -221,7 +225,7 @@ export default function SummaryPage() {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-2 gap-2 p-3 bg-white shadow-sm rounded-xl">
+                  <div className="grid grid-cols-2 gap-2 p-3 bg-card shadow-sm rounded-xl">
                     <div className="col-span-2 space-y-1">
                       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                         <User className="h-3 w-3" /> Member
