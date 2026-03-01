@@ -21,7 +21,7 @@ const Index = () => {
   const { user } = useAuthContext();
   const navigate = useNavigate();
   let sidebarCtx: ReturnType<typeof useSidebar> | null = null;
-  try { sidebarCtx = useSidebar(); } catch {}
+  try { sidebarCtx = useSidebar(); } catch { }
   const [showCreate, setShowCreate] = useState(false);
   const [tripName, setTripName] = useState("");
   const [members, setMembers] = useState<string[]>([""]);
@@ -30,7 +30,7 @@ const Index = () => {
   const handleCreate = async () => {
     const validMembers = members.filter((m) => m.trim());
     if (!tripName.trim() || validMembers.length < 2) return;
-    const validIndex = members[fundManagerIndex]?.trim() ? 
+    const validIndex = members[fundManagerIndex]?.trim() ?
       validMembers.indexOf(members[fundManagerIndex].trim()) : 0;
     await createTrip(tripName.trim(), "BDT", validMembers.map((m) => m.trim()), validIndex >= 0 ? validIndex : 0);
     navigate("/dashboard");
@@ -56,7 +56,7 @@ const Index = () => {
     setMembers((m) => m.map((v, idx) => (idx === i ? val : v)));
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative gradient-hero mesh-bg">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 relative mesh-bg">
       <header className="fixed top-0 left-0 right-0 z-40 px-4 py-3.5 backdrop-blur-md bg-background/60" style={{ maskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 70%, transparent 100%)' }}>
         <div className="mx-auto flex max-w-lg items-center gap-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -74,8 +74,8 @@ const Index = () => {
       </header>
 
       {/* Decorative orbs */}
-      <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-primary/10 blur-3xl animate-pulse-soft" />
-      <div className="absolute bottom-32 right-8 w-40 h-40 rounded-full bg-accent/10 blur-3xl animate-pulse-soft" style={{ animationDelay: "1s" }} />
+      <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-muted/20 blur-3xl animate-pulse-soft" />
+      <div className="absolute bottom-32 right-8 w-40 h-40 rounded-full bg-muted/20 blur-3xl animate-pulse-soft" style={{ animationDelay: "1s" }} />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -163,11 +163,10 @@ const Index = () => {
                           <button
                             type="button"
                             onClick={() => setFundManagerIndex(i)}
-                            className={`shrink-0 p-1.5 rounded-lg transition-all ${
-                              fundManagerIndex === i
-                                ? "text-primary bg-primary/15 glow-sm"
-                                : "text-muted-foreground/40"
-                            }`}
+                            className={`shrink-0 p-1.5 rounded-lg transition-all ${fundManagerIndex === i
+                              ? "text-primary bg-primary/15 glow-sm"
+                              : "text-muted-foreground/40"
+                              }`}
                             title={fundManagerIndex === i ? "Fund Manager" : "Set as Fund Manager"}
                           >
                             <Crown className="h-4 w-4" />

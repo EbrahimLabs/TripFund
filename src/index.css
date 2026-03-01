@@ -224,9 +224,9 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(ellipse at 20% 50%, hsla(230, 98%, 55%, 0.06) 0%, hsla(230, 98%, 55%, 0.02) 30%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, hsla(215, 85%, 50%, 0.05) 0%, hsla(215, 85%, 50%, 0.015) 30%, transparent 60%),
-      radial-gradient(ellipse at 50% 80%, hsla(240, 65%, 56%, 0.03) 0%, hsla(240, 65%, 56%, 0.01) 30%, transparent 60%);
+    background: radial-gradient(ellipse at 20% 50%, hsla(220, 10%, 50%, 0.04) 0%, hsla(220, 10%, 50%, 0.01) 30%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, hsla(220, 10%, 50%, 0.03) 0%, hsla(220, 10%, 50%, 0.01) 30%, transparent 60%),
+      radial-gradient(ellipse at 50% 80%, hsla(220, 10%, 50%, 0.02) 0%, hsla(220, 10%, 50%, 0.005) 30%, transparent 60%);
     pointer-events: none;
     z-index: 0;
   }
