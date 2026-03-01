@@ -143,7 +143,7 @@ export default function SettlementPage() {
         transition={{ delay: i * 0.06 }}
       >
         <Card className={cn(
-          "glass card-elevated border-0 transition-all duration-300",
+          "bg-card shadow-sm border-0 rounded-2xl transition-all duration-300",
           isCompleted && "opacity-60 scale-[0.98]",
           isSelf && !isCompleted && "border border-dashed border-primary/30"
         )}>

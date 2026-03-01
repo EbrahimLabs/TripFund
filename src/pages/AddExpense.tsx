@@ -196,7 +196,7 @@ export default function AddExpense() {
             </AnimatePresence>
             <div className="flex flex-wrap gap-1.5">
               {categoryNames.map((cat) => (
-                <Button key={cat} type="button" variant={category === cat ? "default" : "outline"} size="sm" onClick={() => setCategory(cat)} className={`text-xs transition-all ${category === cat ? "gradient-primary glow-sm border-0" : "glass"}`}>{cat}</Button>
+                <Button key={cat} type="button" variant={category === cat ? "default" : "outline"} size="sm" onClick={() => setCategory(cat)} className={`text-xs transition-all ${category === cat ? "gradient-primary glow-sm border-0" : "bg-card shadow-sm"}`}>{cat}</Button>
               ))}
             </div>
           </div>
@@ -227,7 +227,7 @@ export default function AddExpense() {
           {/* Split Mode */}
           <div className="space-y-2">
             <Label>Split Mode</Label>
-            <div className="flex gap-1.5 p-1 glass rounded-xl">
+            <div className="flex gap-1.5 p-1 bg-card shadow-sm rounded-2xl">
               {(["equal", "unequal", "percentage"] as const).map((mode) => (
                 <Button key={mode} type="button" variant={splitMode === mode ? "default" : "ghost"} size="sm" className={`flex-1 text-xs capitalize h-7 ${splitMode === mode ? "gradient-primary border-0" : ""}`} onClick={() => setSplitMode(mode)}>
                   {mode === "percentage" ? "%" : mode}
@@ -287,13 +287,13 @@ export default function AddExpense() {
           {/* Date */}
           <div className="space-y-2">
             <Label htmlFor="expDate">Date</Label>
-            <Input id="expDate" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="glass" />
+            <Input id="expDate" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-card shadow-sm" />
           </div>
 
           {/* Note */}
           <div className="space-y-2">
             <Label htmlFor="expNote">Note (optional)</Label>
-            <Textarea id="expNote" placeholder="e.g., Dinner at the beach" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="glass" />
+            <Textarea id="expNote" placeholder="e.g., Dinner at the beach" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="bg-card shadow-sm" />
           </div>
 
           <Button type="submit" className="w-full h-12 text-base font-semibold gradient-primary glow-primary border-0" disabled={!amount || selectedMembers.length === 0 || submitting}>{submitting ? <><Loader2 className="h-5 w-5 animate-spin" /> Adding...</> : "Add Expense"}</Button>

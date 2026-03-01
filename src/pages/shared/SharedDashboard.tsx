@@ -28,7 +28,7 @@ export default function SharedDashboard() {
 
   if (error || !trip) return (
     <div className="min-h-screen flex items-center justify-center gradient-hero mesh-bg px-4">
-      <Card className="glass card-elevated border-0 max-w-sm w-full">
+      <Card className="bg-card shadow-sm border-0 rounded-2xl max-w-sm w-full">
         <CardContent className="p-5 text-center space-y-3">
           <AlertCircle className="h-10 w-10 text-destructive mx-auto" />
           <p className="text-sm text-muted-foreground">{error || "Trip not found"}</p>
@@ -42,42 +42,51 @@ export default function SharedDashboard() {
   const dailyExpenses = getDailyExpenses();
   const categoryBreakdown = getCategoryBreakdown();
 
+  const heroContent = (
+    <div className="relative z-10 px-2 pb-2">
+      <div className="flex items-center gap-2 mb-1">
+        <p className="text-sm text-white/80">Account Balance</p>
+        <div className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center">
+          <div className="w-1.5 h-1.5 rounded-full bg-white" />
+        </div>
+      </div>
+      <p className="text-4xl font-display font-bold text-white tracking-tight mb-1">
+        {trip.currency} {stats.balance.toFixed(0)}
+      </p>
+
+      <div className="flex gap-8 mt-6">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 shrink-0">
+            <ArrowDownCircle className="h-4 w-4 text-white" />
+          </div>
+          <div>
+            <p className="text-[10px] text-white/70 uppercase tracking-wider">Deposited</p>
+            <p className="text-sm font-display font-semibold text-white">{trip.currency} {stats.totalDeposited.toFixed(0)}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 shrink-0">
+            <ArrowUpCircle className="h-4 w-4 text-white" />
+          </div>
+          <div>
+            <p className="text-[10px] text-white/70 uppercase tracking-wider">Spent</p>
+            <p className="text-sm font-display font-semibold text-white">{trip.currency} {stats.totalSpent.toFixed(0)}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
-      <PageShell title={trip.name} icon={MapPin}>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <Card className="gradient-card glow-primary border-0 overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2 blur-2xl" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/5 translate-y-1/2 -translate-x-1/2 blur-xl" />
-            <CardContent className="p-5 relative z-10">
-              <p className="text-sm text-white/70 mb-1">Total Balance</p>
-              <p className="text-3xl font-display font-bold text-white">{trip.currency} {stats.balance.toFixed(0)}</p>
-              <div className="flex gap-6 mt-4">
-                <div className="flex items-center gap-2">
-                  <ArrowDownCircle className="h-4 w-4 text-white/70" />
-                  <div>
-                    <p className="text-[10px] text-white/60 uppercase tracking-wider">Deposited</p>
-                    <p className="text-sm font-display font-semibold text-white">{trip.currency} {stats.totalDeposited.toFixed(0)}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ArrowUpCircle className="h-4 w-4 text-white/70" />
-                  <div>
-                    <p className="text-[10px] text-white/60 uppercase tracking-wider">Spent</p>
-                    <p className="text-sm font-display font-semibold text-white">{trip.currency} {stats.totalSpent.toFixed(0)}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+      <PageShell title={trip.name} icon={MapPin} hero={heroContent}>
 
         {dailyExpenses.length > 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="mb-6">
             <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center gap-1.5">
               <TrendingUp className="h-3.5 w-3.5" /> Daily Spending
             </h2>
-            <Card className="glass card-elevated border-0">
+            <Card className="bg-card shadow-sm border-0 rounded-2xl">
               <CardContent className="p-3 pt-4">
                 <ResponsiveContainer width="100%" height={140}>
                   <BarChart data={dailyExpenses}>
@@ -99,7 +108,7 @@ export default function SharedDashboard() {
         {categoryBreakdown.length > 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mb-6">
             <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider mb-3">By Category</h2>
-            <Card className="glass card-elevated border-0">
+            <Card className="bg-card shadow-sm border-0 rounded-2xl">
               <CardContent className="p-3 flex items-center gap-4">
                 <div className="w-24 h-24 shrink-0">
                   <ResponsiveContainer width="100%" height="100%">
@@ -143,7 +152,7 @@ export default function SharedDashboard() {
                 onClick={() => navigate(`../member/${b.member.id}`)}
                 className="cursor-pointer"
               >
-                <Card className="glass card-elevated border-0 group hover:bg-white/[0.02] transition-colors">
+                <Card className="bg-card shadow-sm border-0 rounded-2xl group hover:bg-white/[0.02] transition-colors">
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-display font-semibold text-sm flex items-center gap-1.5 group-hover:text-primary transition-colors">

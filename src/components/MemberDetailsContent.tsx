@@ -76,57 +76,57 @@ export function MemberDetailsContent({ trip, memberId, bottomNav, backTo = "/das
     });
     const sortedDates = Object.keys(txByDate).sort((a, b) => b.localeCompare(a));
 
+    const heroContent = (
+        <div className="relative z-10 px-2 pb-2">
+            <div className="flex justify-between items-start mb-1">
+                <p className="text-sm text-white/80">Net Balance</p>
+                {isFundManager && (
+                    <span className="text-[10px] font-semibold tracking-wider uppercase bg-white/20 text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
+                        Fund Manager
+                    </span>
+                )}
+            </div>
+
+            <div className="flex items-baseline gap-2 mb-1">
+                <p className="text-4xl font-display font-bold text-white tracking-tight">
+                    {stats.net > 0 ? "+" : ""}{trip.currency} {stats.net.toFixed(2)}
+                </p>
+                <p className="text-sm text-white/80">
+                    {stats.net > 0 ? "to receive" : stats.net < 0 ? "owes" : "settled"}
+                </p>
+            </div>
+
+            <div className="flex gap-8 mt-6">
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 shrink-0">
+                        <ArrowDownCircle className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-white/70 uppercase tracking-wider">Total Deposited</p>
+                        <p className="text-sm font-display font-semibold text-white">
+                            {trip.currency} {stats.deposited.toFixed(2)}
+                        </p>
+                    </div>
+                </div>
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 shrink-0">
+                        <ArrowUpCircle className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-white/70 uppercase tracking-wider">Expense Share</p>
+                        <p className="text-sm font-display font-semibold text-white">
+                            {trip.currency} {stats.expenseShare.toFixed(2)}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
     return (
         <>
-            <PageShell title={member.name} icon={UserCircle} backTo={backTo} className="!pb-0">
-                {/* Balance Card */}
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-                    <Card className="gradient-card glow-primary border-0 overflow-hidden relative">
-                        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2 blur-2xl" />
-                        <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-white/5 translate-y-1/2 -translate-x-1/2 blur-xl" />
+            <PageShell title={member.name} icon={UserCircle} backTo={backTo} className="!pb-0" hero={heroContent}>
 
-                        <CardContent className="p-5 relative z-10">
-                            <div className="flex justify-between items-start mb-1">
-                                <p className="text-sm text-white/70">Net Balance</p>
-                                {isFundManager && (
-                                    <span className="text-[10px] font-semibold tracking-wider uppercase bg-white/20 text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
-                                        Fund Manager
-                                    </span>
-                                )}
-                            </div>
-
-                            <div className="flex items-baseline gap-2">
-                                <p className="text-3xl font-display font-bold text-white">
-                                    {stats.net > 0 ? "+" : ""}{trip.currency} {stats.net.toFixed(2)}
-                                </p>
-                                <p className="text-sm text-white/60">
-                                    {stats.net > 0 ? "to receive" : stats.net < 0 ? "owes" : "settled"}
-                                </p>
-                            </div>
-
-                            <div className="flex gap-6 mt-6">
-                                <div className="flex items-center gap-2">
-                                    <ArrowDownCircle className="h-4 w-4 text-white/70" />
-                                    <div>
-                                        <p className="text-[10px] text-white/60 uppercase tracking-wider">Total Deposited</p>
-                                        <p className="text-sm font-display font-semibold text-white">
-                                            {trip.currency} {stats.deposited.toFixed(2)}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <ArrowUpCircle className="h-4 w-4 text-white/70" />
-                                    <div>
-                                        <p className="text-[10px] text-white/60 uppercase tracking-wider">Expense Share</p>
-                                        <p className="text-sm font-display font-semibold text-white">
-                                            {trip.currency} {stats.expenseShare.toFixed(2)}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
 
                 <h2 className="text-sm font-display font-semibold text-muted-foreground uppercase tracking-wider mb-4 flex items-center gap-1.5">
                     <Wallet className="h-4 w-4" /> Activity History
@@ -153,7 +153,7 @@ export function MemberDetailsContent({ trip, memberId, bottomNav, backTo = "/das
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.05 }}
                                     >
-                                        <Card className="glass card-elevated border-0">
+                                        <Card className="bg-card shadow-sm border-0 rounded-2xl">
                                             <CardContent className="p-3">
                                                 <div className="flex items-center gap-3">
                                                     {t.type === 'deposit' ? (

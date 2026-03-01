@@ -17,7 +17,7 @@ export default function SharedMemberDetails() {
 
     if (error || !trip || !memberId) return (
         <div className="min-h-screen flex items-center justify-center gradient-hero mesh-bg px-4">
-            <Card className="glass card-elevated border-0 max-w-sm w-full">
+            <Card className="bg-card shadow-sm border-0 rounded-2xl max-w-sm w-full">
                 <CardContent className="p-5 text-center space-y-3">
                     <AlertCircle className="h-10 w-10 text-destructive mx-auto" />
                     <p className="text-sm text-muted-foreground">{error || "Trip or Member not found"}</p>
