@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { PageShell } from "@/components/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowDownCircle, ArrowUpCircle, UserCircle, Wallet, Calendar } from "lucide-react";
@@ -15,6 +15,10 @@ interface MemberDetailsContentProps {
 }
 
 export function MemberDetailsContent({ trip, memberId, bottomNav, backTo = "/dashboard" }: MemberDetailsContentProps) {
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     const member = trip.members.find(m => m.id === memberId);
     const isFundManager = trip.fundManagerId === memberId;
 
