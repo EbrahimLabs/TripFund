@@ -17,7 +17,7 @@ export default function SharedSummary() {
 
   const allTx = useMemo(() => {
     if (!trip) return [];
-    return [...trip.transactions].sort((a, b) => b.date.localeCompare(a.date));
+    return [...trip.transactions].sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || "").localeCompare(a.createdAt || ""));
   }, [trip]);
 
   if (loading) return (
