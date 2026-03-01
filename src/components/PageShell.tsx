@@ -44,7 +44,7 @@ export function PageShell({ title, children, className, action, backTo, icon: Ic
               initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="text-xl font-display font-bold tracking-tight text-white truncate"
+              className="text-xl font-display font-bold tracking-tight text-white break-words"
             >
               {title}
             </motion.h1>

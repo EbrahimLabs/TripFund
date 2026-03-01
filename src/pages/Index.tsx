@@ -110,7 +110,7 @@ const Index = () => {
                               <MapPin className="h-4 w-4 text-primary-foreground" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-display font-semibold text-sm truncate">{trip.name}</p>
+                              <p className="font-display font-semibold text-sm break-words">{trip.name}</p>
                               <p className="text-xs text-muted-foreground">
                                 {trip.members.length} members · {trip.transactions.length} txns
                               </p>

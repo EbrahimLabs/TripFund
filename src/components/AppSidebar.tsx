@@ -23,10 +23,10 @@ import { Wallet, MapPin } from "lucide-react";
 
 export function AppSidebar() {
   let tripCtx: ReturnType<typeof useTrip> | null = null;
-  try { tripCtx = useTrip(); } catch {}
+  try { tripCtx = useTrip(); } catch { }
   const activeTrip = tripCtx?.activeTrip ?? null;
   const isOwner = tripCtx?.isOwner ?? false;
-  const setActiveTripId = tripCtx?.setActiveTripId ?? (() => {});
+  const setActiveTripId = tripCtx?.setActiveTripId ?? (() => { });
   const createInvite = tripCtx?.createInvite ?? (async () => null);
 
   const navigate = useNavigate();
@@ -44,7 +44,7 @@ export function AppSidebar() {
     if (!token) { toast.error("Failed to create share link"); return; }
     const url = `${window.location.origin}/invite/${token}`;
     if (navigator.share) {
-      try { await navigator.share({ title: `Join "${activeTrip.name}" on TripFund`, url }); } catch {}
+      try { await navigator.share({ title: `Join "${activeTrip.name}" on TripFund`, url }); } catch { }
     } else {
       await navigator.clipboard.writeText(url);
       toast.success("Share link copied!");
@@ -60,7 +60,7 @@ export function AppSidebar() {
             {activeTrip ? <MapPin className="h-4 w-4 text-primary-foreground" /> : <Wallet className="h-4 w-4 text-primary-foreground" />}
           </div>
           <div className="min-w-0">
-            <p className="font-display font-bold text-sm truncate">{activeTrip?.name || "TripFund"}</p>
+            <p className="font-display font-bold text-sm break-words">{activeTrip?.name || "TripFund"}</p>
             {activeTrip && <p className="text-xs text-sidebar-foreground/50">{activeTrip.members.length} members</p>}
           </div>
         </div>
